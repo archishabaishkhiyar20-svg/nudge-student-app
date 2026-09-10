@@ -1,0 +1,3647 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Nudge — Student Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* =========================
+           ONBOARDING
+        ========================= */
+        .onboarding {
+            position: fixed;
+            inset: 0;
+            background: rgba(245, 247, 251, 0.96);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 20px;
+        }
+
+        .onboarding.hidden {
+            display: none;
+        }
+
+        .onboarding-card {
+            width: min(460px, 100%);
+            background: white;
+            border-radius: 24px;
+            padding: 34px;
+            box-shadow: 0 20px 60px rgba(0,0,0,.12);
+        }
+
+        .onboarding-icon {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .onboarding-card h1 {
+            margin: 0 0 8px;
+        }
+
+        .onboarding-card p {
+            color: #666;
+            margin: 0 0 24px;
+            line-height: 1.5;
+        }
+
+        .onboarding-content label {
+            display: block;
+            margin: 0 0 8px;
+            font-weight: 600;
+        }
+
+        .onboarding-input,
+        .onboarding-select,
+        .onboarding-time {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 13px 14px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            font-size: 15px;
+            margin-bottom: 18px;
+        }
+
+        .choice-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .choice-button {
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 12px;
+            padding: 13px 10px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .choice-button.selected {
+            border-color: #6c63ff;
+            background: #f1efff;
+            font-weight: 600;
+        }
+
+        .onboarding-button {
+            width: 100%;
+            border: none;
+            border-radius: 13px;
+            padding: 14px;
+            margin-top: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            background: #111;
+            color: white;
+        }
+
+        .onboarding-progress {
+            text-align: center;
+            margin-top: 14px;
+            color: #888;
+            font-size: 13px;
+        }
+
+        /* =========================
+           PROFILE MODAL
+        ========================= */
+        .profile {
+            cursor: pointer;
+        }
+
+        .profile-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.35);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 5000;
+            padding: 20px;
+        }
+
+        .profile-modal.show {
+            display: flex;
+        }
+
+        .profile-card {
+            width: min(420px, 100%);
+            background: white;
+            border-radius: 22px;
+            padding: 28px;
+            box-shadow: 0 20px 60px rgba(0,0,0,.18);
+        }
+
+        .profile-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 22px;
+        }
+
+        .profile-top h2 {
+            margin: 0;
+        }
+
+        .close-profile {
+            border: none;
+            background: #f1f1f1;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .profile-avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f0eeff;
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+
+        .profile-name {
+            font-size: 23px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .profile-subtitle {
+            color: #777;
+            margin-bottom: 22px;
+        }
+
+        .profile-detail {
+            padding: 13px 0;
+            border-top: 1px solid #eee;
+        }
+
+        .profile-detail span {
+            display: block;
+            color: #888;
+            font-size: 12px;
+            margin-bottom: 3px;
+        }
+
+        .profile-detail strong {
+            font-size: 15px;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 22px;
+        }
+
+        .profile-actions button {
+            flex: 1;
+            border: none;
+            border-radius: 11px;
+            padding: 12px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .edit-profile-button {
+            background: #111;
+            color: white;
+        }
+
+        .cancel-profile-button {
+            background: #eee;
+        }
+
+        /* =========================
+           EDIT PROFILE
+        ========================= */
+        .edit-profile-form {
+            display: none;
+        }
+
+        .edit-profile-form.show {
+            display: block;
+        }
+
+        .edit-profile-form input,
+        .edit-profile-form select {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px;
+            margin: 6px 0 14px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+        }
+
+        .edit-profile-form label {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .edit-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .edit-actions button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .save-profile-button {
+            background: #111;
+            color: white;
+        }
+
+        .stream-edit-group {
+            display: none;
+        }
+
+        .stream-edit-group.show {
+            display: block;
+        }
+
+        body.onboarding-active .app {
+            display: none;
+        }
+/* =========================
+   NUDGE DARK THEME — V6
+========================= */
+
+html[data-theme="dark"] {
+    color-scheme: dark;
+}
+
+/* ---------- BASE ---------- */
+
+html[data-theme="dark"] body {
+    background: #14151b;
+    color: #f1f1f5;
+}
+
+html[data-theme="dark"] .main {
+    background: #14151b;
+}
+
+html[data-theme="dark"] .header {
+    background: #14151b;
+}
+
+/* ---------- SIDEBAR ---------- */
+
+html[data-theme="dark"] .sidebar {
+    background: #181920;
+    border-right-color: #292b34;
+}
+
+html[data-theme="dark"] .nav-item {
+    color: #b7b9c6;
+}
+
+html[data-theme="dark"] .nav-item:hover {
+    background: #23242d;
+    color: #ffffff;
+}
+
+html[data-theme="dark"] .nav-item.active {
+    background: #302d49;
+    color: #ffffff;
+}
+
+html[data-theme="dark"] .icon-button {
+    color: #d2d3dc;
+}
+
+html[data-theme="dark"] .profile {
+    background: #292a35;
+    color: #ffffff;
+}
+
+/* ---------- HEADINGS ---------- */
+
+html[data-theme="dark"] h1,
+html[data-theme="dark"] h2,
+html[data-theme="dark"] h3 {
+    color: #f1f1f5;
+}
+
+html[data-theme="dark"] .page-header h1 {
+    color: #f1f1f5;
+}
+
+html[data-theme="dark"] .page-header p {
+    color: #a5a7b5;
+}
+
+html[data-theme="dark"] .page-kicker {
+    color: #aaa5dc;
+}
+
+html[data-theme="dark"] #dashboardSubtitle {
+    color: #a5a7b5;
+}
+
+/* ---------- QUICK CHECK ---------- */
+
+html[data-theme="dark"] .quick-check,
+html[data-theme="dark"] .quick-check-card {
+    background: #1d1e26;
+    border-color: #2b2c36;
+}
+
+html[data-theme="dark"] .quick-check h2,
+html[data-theme="dark"] .quick-check h3,
+html[data-theme="dark"] .quick-check-card h2,
+html[data-theme="dark"] .quick-check-card h3 {
+    color: #f5f5f7;
+}
+
+html[data-theme="dark"] .quick-check p,
+html[data-theme="dark"] .quick-check-card p {
+    color: #b0b2bf;
+}
+
+/* ---------- DON'T FORGET ---------- */
+
+html[data-theme="dark"] .section-title,
+html[data-theme="dark"] .section-title h2,
+html[data-theme="dark"] .section-title h3 {
+    color: #f1f1f5;
+}
+
+html[data-theme="dark"] .task-card {
+    background: #1d1e26;
+    border-color: #2c2d37;
+}
+
+html[data-theme="dark"] .task-card strong,
+html[data-theme="dark"] .task-card h3 {
+    color: #f0f1f5;
+}
+
+html[data-theme="dark"] .task-card p,
+html[data-theme="dark"] .task-card span {
+    color: #9fa2b2;
+}
+
+html[data-theme="dark"] .source-pill {
+    background: #292a35;
+    color: #bfc1cd;
+}
+
+html[data-theme="dark"] .task-card button {
+    background: #f1f2f6;
+    color: #252631;
+}
+
+/* ---------- WEEK STRIP ---------- */
+
+html[data-theme="dark"] .week-day {
+    background: #1d1e26;
+    border-color: #2b2c36;
+    color: #bfc1cc;
+}
+
+html[data-theme="dark"] .week-day.today {
+    background: #302d49;
+    border-color: #4a456d;
+    color: #ffffff;
+}
+
+/* ---------- SETTINGS ---------- */
+
+html[data-theme="dark"] .settings-group {
+    background: #1d1e26;
+    border-color: #2b2c36;
+}
+
+html[data-theme="dark"] .settings-group-title {
+    border-bottom-color: #2b2c36;
+}
+
+html[data-theme="dark"] .settings-group-title strong,
+html[data-theme="dark"] .settings-row strong {
+    color: #f1f1f5;
+}
+
+html[data-theme="dark"] .settings-group-title small,
+html[data-theme="dark"] .settings-row span,
+html[data-theme="dark"] .settings-about-text p {
+    color: #a3a5b3;
+}
+
+html[data-theme="dark"] .settings-row + .settings-row {
+    border-top-color: #2b2c36;
+}
+
+html[data-theme="dark"] .settings-group-title > span {
+    background: #2a2840;
+}
+
+html[data-theme="dark"] .settings-row select {
+    background: #25262f;
+    border-color: #383944;
+    color: #f1f1f5;
+}
+
+html[data-theme="dark"] .settings-row.clickable:hover {
+    background: #23242d;
+}
+
+html[data-theme="dark"] .settings-about-text > span {
+    color: #7f8291;
+}
+
+/* ---------- INPUTS ---------- */
+
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] select {
+    background: #25262f;
+    color: #f1f1f5;
+    border-color: #383944;
+}
+
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder {
+    color: #777a89;
+}
+
+/* ---------- MODALS ---------- */
+
+html[data-theme="dark"] .modal-content {
+    background: #1d1e26;
+    color: #f1f1f5;
+    border-color: #2b2c36;
+}
+
+html[data-theme="dark"] .modal-content h2,
+html[data-theme="dark"] .modal-content h3 {
+    color: #f1f1f5;
+}
+
+html[data-theme="dark"] .modal-content p {
+    color: #a5a7b5;
+}
+
+html[data-theme="dark"] .close-button {
+    color: #b7b9c6;
+}
+
+/* ---------- EMPTY STATES ---------- */
+
+html[data-theme="dark"] .page-empty,
+html[data-theme="dark"] .smart-empty {
+    color: #a5a7b5;
+}
+    </style>
+<style>
+:root {
+  --bg:#f6f8fc; --surface:#ffffff; --surface-2:#f0f3fa; --text:#101936;
+  --muted:#69728a; --line:#e4e8f1; --accent:#4f46e5; --accent-2:#635bff;
+  --accent-soft:#e9e8ff; --shadow:0 10px 30px rgba(24,32,66,.06);
+  --radius:18px;
+}
+body { background:var(--bg); color:var(--text); font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+.app { min-height:100vh; }
+.sidebar { background:#fff; border-right:1px solid var(--line); width:235px; padding:28px 18px 22px; }
+.logo { color:var(--text); font-size:22px; font-weight:800; letter-spacing:-.7px; display:flex; align-items:center; gap:10px; margin:0 8px 38px; }
+.logo-mark { width:30px; height:30px; border-radius:9px; display:grid; place-items:center; background:var(--text); color:#fff; font-size:15px; }
+nav { display:flex; flex-direction:column; gap:6px; }
+.nav-item { border:0; background:transparent; color:#65708a; border-radius:12px; padding:12px 13px; display:flex; align-items:center; gap:13px; font-size:14px; font-weight:600; text-align:left; cursor:pointer; transition:.18s ease; }
+.nav-item:hover { background:#f4f5fa; color:var(--text); transform:translateX(1px); }
+.nav-item.active { background:#ecebff; color:var(--accent); }
+.nav-item span { flex:1; }
+.nav-item.settings { margin-top:auto; }
+.main { max-width:1180px; margin:0 auto; padding:42px 52px 70px; }
+header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:34px; }
+.today-label { color:#7c8498; font-size:11px; font-weight:800; letter-spacing:1.6px; margin-bottom:8px; }
+.welcome-copy h1 { margin:0; font-size:42px; line-height:1.04; letter-spacing:-1.8px; color:var(--text); }
+.welcome-copy p { margin:12px 0 0; color:var(--muted); font-size:16px; }
+.header-actions { display:flex; align-items:center; gap:10px; }
+.icon-button { width:42px; height:42px; border:1px solid var(--line); background:#fff; color:var(--text); border-radius:12px; font-size:23px; cursor:pointer; position:relative; }
+.notification-button span { position:absolute; width:6px; height:6px; border-radius:50%; background:#ff4d6d; top:9px; right:10px; }
+.profile { width:42px; height:42px; border-radius:50%; background:#e8ebf2; display:grid; place-items:center; cursor:pointer; font-size:19px; border:1px solid var(--line); }
+.quick-check { position:relative; overflow:hidden; background:linear-gradient(120deg,#262b78 0%,#4547b8 58%,#3536a0 100%); color:#fff; border:0; border-radius:22px; padding:30px 32px; margin-bottom:42px; box-shadow:0 18px 40px rgba(45,48,135,.20); }
+.quick-check:after { content:""; position:absolute; width:310px; height:310px; border:1px solid rgba(255,255,255,.12); border-radius:50%; right:-110px; top:-155px; box-shadow:0 0 0 55px rgba(255,255,255,.025),0 0 0 110px rgba(255,255,255,.02); }
+.quick-check > div:first-child { position:relative; z-index:1; }
+.quick-check h2 { margin:0 0 8px; text-transform:uppercase; letter-spacing:2px; font-size:12px; opacity:.78; }
+.quick-check p { margin:0; font-size:26px; font-weight:750; letter-spacing:-.7px; max-width:560px; }
+.quick-check-actions { position:relative; z-index:2; margin-top:23px; }
+.quick-check-now,.add-button { border-radius:11px; padding:11px 17px; font-weight:700; cursor:pointer; }
+.quick-check-now { border:1px solid rgba(255,255,255,.18); background:#fff; color:#272a78; }
+.quick-check .add-button { border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.11); color:#fff; }
+.dashboard-section { margin-top:38px; }
+.section-heading-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:15px; }
+.section-title { margin:0; color:var(--text); font-size:21px; text-transform:none; letter-spacing:-.5px; }
+.text-link { border:0; background:transparent; color:#5d6780; font-weight:650; cursor:pointer; }
+.task-list { display:flex; flex-direction:column; gap:12px; }
+.task-card { display:grid; grid-template-columns:52px 1fr auto auto; align-items:center; gap:15px; background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:16px 18px; box-shadow:var(--shadow); }
+.task-card:hover { transform:translateY(-1px); box-shadow:0 14px 32px rgba(24,32,66,.09); }
+.task-card .icon { width:48px; height:48px; border-radius:13px; display:grid; place-items:center; background:#eef0ff; color:var(--accent); font-size:18px; }
+.task-info { display:flex; flex-direction:column; gap:5px; min-width:0; }
+.task-info strong { font-size:16px; color:var(--text); }
+.task-info span { font-size:13px; color:var(--muted); }
+.done-button,.delete-button { border:1px solid var(--line); background:#fff; color:#5c6680; border-radius:10px; padding:8px 10px; cursor:pointer; font-weight:650; }
+.done-button:hover { background:#edfdf5; color:#15845b; border-color:#c9f1df; }
+.delete-button { color:#9a6170; }
+.week-strip { display:grid; grid-template-columns:repeat(7,1fr); gap:10px; }
+.week-day { min-height:90px; background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px; }
+.week-day.today { background:#ecebff; border-color:#d6d4ff; }
+.week-day .day-name { font-size:11px; font-weight:750; color:#717a91; text-transform:uppercase; }
+.week-day .day-number { display:block; font-size:21px; font-weight:800; margin-top:7px; }
+.week-day .day-dot { display:block; width:7px; height:7px; border-radius:50%; background:#ff4d6d; margin-top:11px; }
+.glance-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+.glance-card { background:#fff; border:1px solid var(--line); border-radius:16px; padding:18px; display:grid; grid-template-columns:36px 1fr; column-gap:10px; box-shadow:var(--shadow); }
+.glance-icon { width:32px; height:32px; border-radius:10px; background:#eef0ff; color:var(--accent); display:grid; place-items:center; grid-row:span 2; font-weight:800; }
+.glance-card strong { font-size:22px; line-height:1; }
+.glance-card small { color:var(--muted); margin-top:4px; }
+
+.add-form { max-width:760px; margin:22px 0 8px; padding:25px; background:#fff; border:1px solid var(--line); border-radius:20px; box-shadow:0 18px 42px rgba(24,32,66,.08); }
+.form-kicker { color:var(--accent); font-size:10px; font-weight:850; letter-spacing:1.7px; margin-bottom:5px; }
+.add-form h2 { margin:0; font-size:24px; letter-spacing:-.6px; }
+.add-form > p { margin:6px 0 20px; color:var(--muted); font-size:13px; }
+.add-form label { display:block; margin:14px 0 7px; font-size:12px; font-weight:750; color:#5f6880; }
+.add-form input,.add-form select { width:100%; box-sizing:border-box; border:1px solid #dfe3ee; background:#fbfcff; color:var(--text); border-radius:11px; padding:11px 12px; font:inherit; outline:none; }
+.add-form input:focus,.add-form select:focus { border-color:#aaa8ef; box-shadow:0 0 0 3px rgba(79,70,229,.08); }
+.capture-two-col { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.optional-label { color:#a0a6b5; font-weight:500; }
+.primary-form-button { background:var(--accent)!important; color:#fff!important; border-color:var(--accent)!important; }
+@media(max-width:850px){ .sidebar{width:78px;padding:22px 10px}.logo{justify-content:center;font-size:0}.logo-mark{font-size:15px}.nav-item{justify-content:center}.nav-item span{display:none}.main{padding:30px 24px}.welcome-copy h1{font-size:34px}.week-strip{grid-template-columns:repeat(4,1fr)} }
+@media(max-width:600px){ .capture-two-col{grid-template-columns:1fr}.main{padding:24px 16px}.header-actions .icon-button{display:none}.quick-check{padding:25px 22px}.quick-check p{font-size:22px}.task-card{grid-template-columns:44px 1fr}.task-card .done-button,.task-card .delete-button{grid-column:2}.week-strip{grid-template-columns:repeat(2,1fr)} }
+</style>
+</head>
+
+<body>
+
+<!-- =========================
+     ONBOARDING
+========================= -->
+<div id="onboarding" class="onboarding">
+    <div class="onboarding-card">
+        <div class="onboarding-icon">✦</div>
+        <h1 id="onboardingTitle">Hey! 👋</h1>
+        <p id="onboardingText">Let's set up your student space.</p>
+
+        <div id="onboardingContent" class="onboarding-content"></div>
+
+        <button class="onboarding-button" onclick="nextOnboardingStep()">
+            Continue →
+        </button>
+
+        <div class="onboarding-progress">
+            <span id="onboardingStep">1</span> / <span id="onboardingTotal">5</span>
+        </div>
+    </div>
+</div>
+
+<!-- =========================
+     PROFILE MODAL
+========================= -->
+<div id="profileModal" class="profile-modal" onclick="closeProfileIfOutside(event)">
+    <div class="profile-card">
+
+        <div class="profile-top">
+            <h2>Your profile</h2>
+            <button class="close-profile" onclick="closeProfile()">×</button>
+        </div>
+
+        <div id="profileView">
+            <div class="profile-avatar">👤</div>
+            <div id="profileName" class="profile-name">Student</div>
+            <div id="profileSubtitle" class="profile-subtitle"></div>
+
+            <div class="profile-detail">
+                <span>Class</span>
+                <strong id="profileClass"></strong>
+            </div>
+
+            <div class="profile-detail">
+                <span>Board</span>
+                <strong id="profileBoard"></strong>
+            </div>
+
+            <div id="profileStreamRow" class="profile-detail">
+                <span>Stream</span>
+                <strong id="profileStream"></strong>
+            </div>
+
+            <div class="profile-detail">
+                <span>Usually free</span>
+                <strong id="profileFreeTime"></strong>
+            </div>
+
+            <div class="profile-actions">
+                <button class="edit-profile-button" onclick="startEditProfile()">
+                    Edit profile
+                </button>
+                <button class="cancel-profile-button" onclick="closeProfile()">
+                    Close
+                </button>
+            </div>
+        </div>
+
+        <div id="editProfileForm" class="edit-profile-form">
+            <label>Name</label>
+            <input id="editName" type="text">
+
+            <label>Class</label>
+            <select id="editClass" onchange="updateEditStreamVisibility()">
+                <option value="Class 9">Class 9</option>
+                <option value="Class 10">Class 10</option>
+                <option value="Class 11">Class 11</option>
+                <option value="Class 12">Class 12</option>
+            </select>
+
+            <label>Board</label>
+            <select id="editBoard">
+                <option value="CBSE">CBSE</option>
+                <option value="ICSE/ISC">ICSE/ISC</option>
+                <option value="State Board">State Board</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <div id="streamEditGroup" class="stream-edit-group">
+                <label>Stream</label>
+                <select id="editStream">
+                    <option value="PCM">PCM</option>
+                    <option value="PCB">PCB</option>
+                    <option value="Commerce">Commerce</option>
+                    <option value="Humanities">Humanities</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <label>Usually free</label>
+            <input id="editFreeTime" type="time">
+
+            <div class="edit-actions">
+                <button class="save-profile-button" onclick="saveEditedProfile()">
+                    Save changes
+                </button>
+                <button onclick="cancelEditProfile()">
+                    Cancel
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="app">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <h2 class="logo"><span class="logo-mark">N</span> Nudge</h2>
+
+        <nav>
+    <button class="nav-item active" onclick="showPage('home')">
+        ⌂ <span>Home</span>
+    </button>
+
+    <button class="nav-item" onclick="showPage('tests')">
+        ▣ <span>Tests</span>
+    </button>
+
+    <button class="nav-item" onclick="showPage('tasks')">
+        ✓ <span>Tasks</span>
+    </button>
+
+    <button class="nav-item" onclick="showPage('calendar')">
+        ▦ <span>Calendar</span>
+    </button>
+
+    <button class="nav-item" onclick="showPage('explore')">
+        ↗ <span>Explore</span>
+    </button>
+</nav>
+
+<button class="nav-item settings" onclick="showPage('settings')">
+    ⚙ <span>Settings</span>
+</button>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+
+        <header>
+            <div class="welcome-copy">
+                <div class="today-label" id="todayLabel">TODAY</div>
+                <h1 id="greeting">Good morning! 👋</h1>
+                <p id="dashboardSubtitle">Let's make sure nothing slips through the cracks.</p>
+            </div>
+
+            <div class="header-actions">
+                <button class="icon-button" aria-label="Search">⌕</button>
+                <button class="icon-button notification-button" aria-label="Notifications">♧<span></span></button>
+                <div class="profile" onclick="openProfile()">👤</div>
+            </div>
+        </header>
+
+        <!-- QUICK CHECK -->
+        <section class="quick-check">
+            <div>
+                <h2>🔔 Quick check</h2>
+                <p>
+                    Did you get anything new from school, classes,
+                    or anywhere else today?
+                </p>
+            </div>
+
+            <div class="quick-check-actions">
+                <button class="quick-check-now" onclick="openQuickCheck()">Check now</button>
+                <button class="add-button" onclick="openForm()">+ Add something</button>
+            </div>
+        </section>
+
+
+        <!-- QUICK CHECK MODAL -->
+        <div id="quickCheckModal" class="quick-check-modal" onclick="closeQuickCheckIfOutside(event)">
+            <div class="quick-check-dialog">
+                <button class="quick-check-close" onclick="closeQuickCheck()" aria-label="Close">×</button>
+                <div class="quick-check-icon">🔔</div>
+                <h2>Quick check</h2>
+                <p class="quick-check-question">Did you get anything new today?</p>
+                <p class="quick-check-helper">Just tap what applies. You can add the details in the next step.</p>
+
+                <div class="quick-check-options">
+                    <button onclick="quickCheckSelect('Test')">📝 <span>Test</span></button>
+                    <button onclick="quickCheckSelect('Homework')">📚 <span>Homework</span></button>
+                    <button onclick="quickCheckSelect('Assignment')">📋 <span>Assignment</span></button>
+                    <button onclick="quickCheckSelect('Other')">✨ <span>Something else</span></button>
+                    <button class="nothing-option" onclick="quickCheckNothing()">✓ <span>Nothing today</span></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADD FORM -->
+        <div id="addForm" class="add-form">
+            <div class="form-kicker">QUICK CAPTURE</div>
+            <h2 id="addFormTitle">Add something</h2>
+            <p id="addFormHelper">Just the details you’ll want later. Nothing more.</p>
+
+            <label>What did you get?</label>
+            <select id="itemType" onchange="updateCaptureForm()">
+                <option value="Test">Test</option>
+                <option value="Assignment">Assignment</option>
+                <option value="Project">Project</option>
+                <option value="Homework">Homework</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <label id="itemNameLabel">What is it?</label>
+            <input type="text" id="itemName" placeholder="e.g. Physics Test">
+
+            <div class="capture-two-col">
+                <div>
+                    <label id="subjectLabel">Subject</label>
+                    <input type="text" id="itemSubject" placeholder="e.g. Physics">
+                </div>
+                <div>
+                    <label>From</label>
+                    <select id="itemSource">
+                        <option value="School">🏫 School</option>
+                        <option value="Coaching">📚 Coaching</option>
+                        <option value="WhatsApp">💬 WhatsApp / Group</option>
+                        <option value="Other">✨ Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="capture-two-col">
+                <div>
+                    <label id="dateLabel">Due date</label>
+                    <input type="date" id="itemDate">
+                </div>
+                <div id="timeField">
+                    <label>Time <span class="optional-label">optional</span></label>
+                    <input type="time" id="itemTime">
+                </div>
+            </div>
+
+            <div class="form-buttons">
+                <button class="primary-form-button" onclick="addItem()">Save it</button>
+                <button onclick="closeForm()">Cancel</button>
+            </div>
+        </div>
+
+        <!-- DON'T FORGET -->
+        <section class="dashboard-section task-section">
+            <div class="section-heading-row">
+                <h2 class="section-title">Don't forget</h2>
+                <button class="text-link">View all →</button>
+            </div>
+            <div class="task-list"></div>
+        </section>
+
+        <!-- THIS WEEK -->
+        <section class="dashboard-section week-section">
+            <div class="section-heading-row">
+                <h2 class="section-title">This week</h2>
+                <button class="text-link">Calendar →</button>
+            </div>
+            <div class="week-strip" id="weekStrip"></div>
+        </section>
+
+        <!-- AT A GLANCE -->
+        <section class="dashboard-section glance-section">
+            <div class="section-heading-row">
+                <h2 class="section-title">At a glance</h2>
+            </div>
+            <div class="glance-grid">
+                <div class="glance-card"><span class="glance-icon">✓</span><strong id="todayCount">0</strong><small>Pending today</small></div>
+                <div class="glance-card"><span class="glance-icon">▣</span><strong id="weekCount">0</strong><small>Upcoming this week</small></div>
+            </div>
+        </section>
+<!-- =========================
+     V5 PAGES
+========================= -->
+
+<section id="tasksPage" class="app-page">
+
+    <div class="page-header">
+        <span class="page-kicker">YOUR WORK</span>
+        <h1>Tasks</h1>
+        <p>Everything you've captured in one place.</p>
+    </div>
+
+    <div id="allTasksList" class="page-list"></div>
+
+</section>
+
+
+<section id="testsPage" class="app-page">
+
+    <div class="page-header">
+        <span class="page-kicker">UPCOMING</span>
+        <h1>Tests</h1>
+        <p>Your tests, without digging through everything else.</p>
+    </div>
+
+    <div id="testsList" class="page-list"></div>
+
+</section>
+
+
+<section id="calendarPage" class="app-page">
+
+    <div class="page-header">
+        <span class="page-kicker">YOUR WEEK</span>
+        <h1>Calendar</h1>
+        <p>A simple view of what's happening this week.</p>
+    </div>
+
+    <div id="calendarWeekStrip" class="calendar-week-strip"></div>
+
+    <div id="calendarDayTasks" class="page-list"></div>
+
+</section>
+
+
+<section id="explorePage" class="app-page">
+
+    <div class="page-header">
+        <span class="page-kicker">COMING SOON</span>
+        <h1>Explore</h1>
+        <p>Useful opportunities and student resources.</p>
+    </div>
+
+    <div class="page-empty">
+        <div>✨</div>
+        <strong>We're building this.</strong>
+        <span>
+            Competitions, opportunities and useful resources
+            will live here later.
+        </span>
+    </div>
+
+</section>
+
+<section id="settingsPage" class="app-page">
+
+    <div class="page-header">
+        <span class="page-kicker">PREFERENCES</span>
+        <h1>Settings</h1>
+        <p>Make Nudge work the way you want.</p>
+    </div>
+
+    <div class="settings-list">
+
+        <!-- APPEARANCE -->
+        <div class="settings-group">
+
+            <div class="settings-group-title">
+                <span>🎨</span>
+
+                <div>
+                    <strong>Appearance</strong>
+                    <small>Choose how Nudge looks.</small>
+                </div>
+            </div>
+
+            <div class="settings-row">
+
+                <div>
+                    <strong>Theme</strong>
+                    <span>Choose your preferred appearance.</span>
+                </div>
+
+                <select id="themeSetting"
+                        onchange="saveSetting('theme', this.value)">
+
+                    <option value="system">System</option>
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+
+        <!-- NOTIFICATIONS -->
+        <div class="settings-group">
+
+            <div class="settings-group-title">
+                <span>🔔</span>
+
+                <div>
+                    <strong>Notifications</strong>
+                    <small>Control when Nudge checks in with you.</small>
+                </div>
+            </div>
+
+            <div class="settings-row">
+
+                <div>
+                    <strong>Quick Check</strong>
+                    <span>Remind me to check for new school work.</span>
+                </div>
+
+                <label class="toggle">
+
+                    <input
+                        type="checkbox"
+                        id="quickCheckSetting"
+                        onchange="saveSetting('quickCheck', this.checked)"
+                    >
+
+                    <span></span>
+
+                </label>
+
+            </div>
+
+
+            <div class="settings-row">
+
+                <div>
+                    <strong>Task reminders</strong>
+                    <span>Remind me about upcoming tasks.</span>
+                </div>
+
+                <label class="toggle">
+
+                    <input
+                        type="checkbox"
+                        id="taskReminderSetting"
+                        onchange="saveSetting('taskReminders', this.checked)"
+                    >
+
+                    <span></span>
+
+                </label>
+
+            </div>
+
+        </div>
+
+
+        <!-- PLANNING -->
+        <div class="settings-group">
+
+            <div class="settings-group-title">
+                <span>📅</span>
+
+                <div>
+                    <strong>Planning</strong>
+                    <small>Adjust how your schedule is organised.</small>
+                </div>
+            </div>
+
+            <div class="settings-row">
+
+                <div>
+                    <strong>Week starts on</strong>
+                    <span>Choose the first day of your week.</span>
+                </div>
+
+                <select
+                    id="weekStartSetting"
+                    onchange="saveSetting('weekStart', this.value)"
+                >
+
+                    <option value="monday">Monday</option>
+                    <option value="sunday">Sunday</option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+
+        <!-- DATA & PRIVACY -->
+        <div class="settings-group">
+
+            <div class="settings-group-title">
+                <span>💾</span>
+
+                <div>
+                    <strong>Data & Privacy</strong>
+                    <small>Your data stays in this browser for now.</small>
+                </div>
+            </div>
+
+            <div
+                class="settings-row clickable"
+                onclick="exportStudentData()"
+            >
+
+                <div>
+                    <strong>Export my data</strong>
+                    <span>Save your tasks and profile as a file.</span>
+                </div>
+
+                <span class="settings-arrow">→</span>
+
+            </div>
+
+
+            <div
+                class="settings-row clickable danger-row"
+                onclick="resetStudentData()"
+            >
+
+                <div>
+                    <strong>Reset app data</strong>
+                    <span>Delete your saved Nudge data from this browser.</span>
+                </div>
+
+                <span class="settings-arrow">→</span>
+
+            </div>
+
+        </div>
+
+
+        <!-- HELP -->
+        <div class="settings-group">
+
+            <div class="settings-group-title">
+                <span>❓</span>
+
+                <div>
+                    <strong>Help & Feedback</strong>
+                    <small>Something confusing or not working?</small>
+                </div>
+            </div>
+
+            <div
+                class="settings-row clickable"
+                onclick="showSettingsMessage('Feedback')"
+            >
+
+                <div>
+                    <strong>Send feedback</strong>
+                    <span>Tell us what could make Nudge better.</span>
+                </div>
+
+                <span class="settings-arrow">→</span>
+
+            </div>
+
+        </div>
+
+
+        <!-- ABOUT -->
+        <div class="settings-group about-settings">
+
+            <div class="settings-group-title">
+                <span>ℹ️</span>
+
+                <div>
+                    <strong>About Nudge</strong>
+                    <small>Student memory system</small>
+                </div>
+            </div>
+
+            <div class="settings-about-text">
+
+                <strong>Nudge</strong>
+
+                <p>
+                    A student workspace designed to help you
+                    remember what school forgot to remind you about.
+                </p>
+
+                <span>Version 0.6 • Local prototype</span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+    </main>
+</div>
+
+
+<style>
+.quick-check-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.quick-check-now {
+    border: 1px solid #d9d9e8;
+    background: #fff;
+    color: #4d4d63;
+    padding: 10px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    font: inherit;
+    transition: transform .15s ease, background .15s ease;
+}
+.quick-check-now:hover {
+    background: #f7f7fb;
+    transform: translateY(-1px);
+}
+.quick-check-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(20,20,35,.42);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+    padding: 20px;
+}
+.quick-check-modal.show { display: flex; }
+.quick-check-dialog {
+    width: min(460px, 100%);
+    background: #fff;
+    border-radius: 22px;
+    padding: 30px;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,.18);
+    text-align: center;
+}
+.quick-check-close {
+    position: absolute;
+    top: 12px;
+    right: 15px;
+    border: 0;
+    background: transparent;
+    font-size: 28px;
+    color: #777;
+    cursor: pointer;
+    line-height: 1;
+}
+.quick-check-icon { font-size: 34px; margin-bottom: 6px; }
+.quick-check-dialog h2 { margin: 0 0 8px; font-size: 26px; }
+.quick-check-question { margin: 0; font-size: 18px; font-weight: 600; }
+.quick-check-helper { margin: 8px 0 22px; color: #777; font-size: 14px; }
+.quick-check-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+.quick-check-options button {
+    border: 1px solid #e1e1eb;
+    background: #fafafd;
+    border-radius: 13px;
+    padding: 13px 12px;
+    cursor: pointer;
+    font: inherit;
+    color: #333;
+    transition: transform .15s ease, border-color .15s ease, background .15s ease;
+}
+.quick-check-options button:hover {
+    transform: translateY(-1px);
+    border-color: #bdbde0;
+    background: #f5f5fb;
+}
+.quick-check-options .nothing-option {
+    grid-column: 1 / -1;
+    background: #f7f8f7;
+}
+.quick-check-options span { margin-left: 4px; }
+@media (max-width: 600px) {
+    .quick-check-dialog { padding: 24px 18px; }
+    .quick-check-options { grid-template-columns: 1fr; }
+    .quick-check-options .nothing-option { grid-column: auto; }
+}
+/* =========================
+   V5 SIDEBAR PAGES
+========================= */
+
+.app-page {
+    display: none;
+    animation: pageFade .2s ease;
+}
+
+.app-page.show {
+    display: block;
+}
+
+@keyframes pageFade {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.page-header {
+    margin-bottom: 28px;
+}
+
+.page-kicker {
+    display: block;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    color: #8a82c9;
+    margin-bottom: 8px;
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 38px;
+    letter-spacing: -1.5px;
+}
+
+.page-header p {
+    margin: 9px 0 0;
+    color: var(--muted);
+}
+
+.page-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.page-task-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 17px;
+    background: #fff;
+    border: 1px solid #eeeef4;
+    border-radius: 18px;
+}
+
+.page-task-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 13px;
+    background: #f0efff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.page-task-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.page-task-info strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.page-task-info span {
+    display: block;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.page-empty {
+    min-height: 220px;
+    border-radius: 22px;
+    background: #fff;
+    border: 1px solid #eeeef4;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 30px;
+}
+
+.page-empty div {
+    font-size: 34px;
+    margin-bottom: 12px;
+}
+
+.page-empty strong {
+    font-size: 17px;
+    margin-bottom: 6px;
+}
+
+.page-empty span {
+    max-width: 420px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.calendar-week-strip {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 9px;
+    margin-bottom: 24px;
+}
+
+.calendar-day {
+    padding: 15px 8px;
+    border-radius: 15px;
+    background: #fff;
+    border: 1px solid #eeeef4;
+    text-align: center;
+    cursor: pointer;
+}
+
+.calendar-day:hover {
+    background: #f7f6ff;
+}
+
+.calendar-day.selected {
+    background: #ecebff;
+    border-color: #dcd9ff;
+}
+
+.calendar-day-name {
+    display: block;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 7px;
+}
+
+.calendar-day-number {
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.calendar-dot {
+    width: 5px;
+    height: 5px;
+    background: #8278d2;
+    border-radius: 50%;
+    display: block;
+    margin: 7px auto 0;
+}
+
+.settings-profile-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #eeeef4;
+    border-radius: 20px;
+}
+
+.settings-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: #ecebff;
+    color: #746bc1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.settings-profile-card strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.settings-profile-card span {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.settings-edit-button {
+    margin-top: 15px;
+    padding: 11px 17px;
+    border: 0;
+    border-radius: 12px;
+    background: #ecebff;
+    color: #655bb5;
+    font-weight: 700;
+    cursor: pointer;
+}
+/* =========================
+   SETTINGS — V6
+========================= */
+
+.settings-list {
+    max-width: 820px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.settings-group {
+    background: white;
+    border: 1px solid #eeeef4;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.settings-group-title {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 20px 22px;
+    border-bottom: 1px solid #f0f0f5;
+}
+
+.settings-group-title > span {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: #ecebff;
+    display: grid;
+    place-items: center;
+    font-size: 17px;
+}
+
+.settings-group-title strong {
+    display: block;
+    font-size: 15px;
+    margin-bottom: 3px;
+}
+
+.settings-group-title small {
+    color: #8b8fa3;
+    font-size: 12px;
+}
+
+.settings-row {
+    min-height: 68px;
+    padding: 15px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.settings-row + .settings-row {
+    border-top: 1px solid #f1f1f5;
+}
+
+.settings-row strong {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.settings-row span {
+    color: #8b8fa3;
+    font-size: 12px;
+}
+
+.settings-row select {
+    min-width: 125px;
+    padding: 9px 12px;
+    border: 1px solid #ddddea;
+    border-radius: 10px;
+    background: #fafaff;
+    color: #172033;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.settings-row.clickable {
+    cursor: pointer;
+    transition: background 0.18s ease;
+}
+
+.settings-row.clickable:hover {
+    background: #fafaff;
+}
+
+.settings-arrow {
+    font-size: 18px !important;
+    color: #746bc1 !important;
+}
+
+.danger-row strong {
+    color: #b34d4d;
+}
+
+.danger-row .settings-arrow {
+    color: #b34d4d !important;
+}
+
+.toggle {
+    position: relative;
+    width: 44px;
+    height: 25px;
+    flex-shrink: 0;
+}
+
+.toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle span {
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: #dfe1e9;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.toggle span::after {
+    content: "";
+    position: absolute;
+    width: 19px;
+    height: 19px;
+    left: 3px;
+    top: 3px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    transition: 0.2s ease;
+}
+
+.toggle input:checked + span {
+    background: #746bc1;
+}
+
+.toggle input:checked + span::after {
+    transform: translateX(19px);
+}
+
+.settings-about-text {
+    padding: 18px 22px 22px;
+}
+
+.settings-about-text strong {
+    font-size: 14px;
+}
+
+.settings-about-text p {
+    color: #8b8fa3;
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 7px 0;
+    max-width: 600px;
+}
+
+.settings-about-text > span {
+    font-size: 11px;
+    color: #969bad;
+}
+</style>
+
+<script>
+
+/* =========================
+   PROFILE / ONBOARDING DATA
+========================= */
+
+let onboardingStep = 1;
+
+let profileData = {
+    name: "",
+    className: "",
+    board: "",
+    stream: "",
+    freeTime: ""
+};
+
+
+/* =========================
+   PROFILE HELPERS
+========================= */
+
+function getProfile() {
+    return JSON.parse(
+        localStorage.getItem("studentProfile") || "null"
+    );
+}
+
+function saveProfile(profile) {
+    localStorage.setItem(
+        "studentProfile",
+        JSON.stringify(profile)
+    );
+}
+
+
+/* =========================
+   ONBOARDING
+========================= */
+
+function checkProfile() {
+
+    const savedProfile = getProfile();
+
+    if (savedProfile) {
+        profileData = savedProfile;
+        document.body.classList.remove("onboarding-active");
+        document.getElementById("onboarding").classList.add("hidden");
+        updateProfileDisplay();
+        return;
+    }
+
+    document.body.classList.add("onboarding-active");
+    document.getElementById("onboarding").classList.remove("hidden");
+
+    showOnboardingStep();
+}
+
+
+function showOnboardingStep() {
+
+    const title = document.getElementById("onboardingTitle");
+    const text = document.getElementById("onboardingText");
+    const content = document.getElementById("onboardingContent");
+    const stepNumber = document.getElementById("onboardingStep");
+    const total = document.getElementById("onboardingTotal");
+
+    let totalSteps =
+        (profileData.className === "Class 9" ||
+         profileData.className === "Class 10")
+        ? 4
+        : 5;
+
+    total.textContent = totalSteps;
+
+    if (onboardingStep === 1) {
+
+        title.textContent = "Hey! 👋";
+        text.textContent = "First, what should we call you?";
+
+        content.innerHTML = `
+            <label>Your name</label>
+            <input
+                id="onboardingName"
+                class="onboarding-input"
+                type="text"
+                placeholder="e.g. Archisha"
+                value="${escapeHTML(profileData.name)}"
+                autofocus>
+        `;
+
+    } else if (onboardingStep === 2) {
+
+        title.textContent = "Nice to meet you! ✨";
+        text.textContent = "Which class are you in?";
+
+        content.innerHTML = `
+            <div class="choice-grid">
+                ${choiceButton("Class 9", "className")}
+                ${choiceButton("Class 10", "className")}
+                ${choiceButton("Class 11", "className")}
+                ${choiceButton("Class 12", "className")}
+            </div>
+        `;
+
+    } else if (onboardingStep === 3) {
+
+        title.textContent = "Got it! 📚";
+        text.textContent = "Which board are you studying under?";
+
+        content.innerHTML = `
+            <div class="choice-grid">
+                ${choiceButton("CBSE", "board")}
+                ${choiceButton("ICSE/ISC", "board")}
+                ${choiceButton("State Board", "board")}
+                ${choiceButton("Other", "board")}
+            </div>
+        `;
+
+    } else if (
+        onboardingStep === 4 &&
+        profileData.className !== "Class 9" &&
+        profileData.className !== "Class 10"
+    ) {
+
+        title.textContent = "One more academic detail 🎓";
+        text.textContent = "What's your stream?";
+
+        content.innerHTML = `
+            <div class="choice-grid">
+                ${choiceButton("PCM", "stream")}
+                ${choiceButton("PCB", "stream")}
+                ${choiceButton("Commerce", "stream")}
+                ${choiceButton("Humanities", "stream")}
+                ${choiceButton("Other", "stream")}
+            </div>
+        `;
+
+    } else {
+
+        title.textContent = "Almost there! 🕐";
+        text.textContent =
+            "When are you usually free after school or coaching?";
+
+        content.innerHTML = `
+            <label>Your usual free time</label>
+            <input
+                id="onboardingFreeTime"
+                class="onboarding-time"
+                type="time"
+                value="${profileData.freeTime || ""}">
+        `;
+    }
+
+    stepNumber.textContent = onboardingStep;
+
+    setTimeout(function() {
+        const firstInput =
+            content.querySelector("input");
+
+        if (firstInput) {
+            firstInput.focus();
+        }
+    }, 50);
+}
+
+
+function choiceButton(label, property) {
+
+    const selected =
+        profileData[property] === label
+        ? "selected"
+        : "";
+
+    return `
+        <button
+            type="button"
+            class="choice-button ${selected}"
+            onclick="selectChoice(this, '${property}', '${label}')">
+            ${label}
+        </button>
+    `;
+}
+
+
+function selectChoice(button, property, value) {
+
+    profileData[property] = value;
+
+    const buttons =
+        button.parentElement.querySelectorAll(
+            ".choice-button"
+        );
+
+    buttons.forEach(function(btn) {
+        btn.classList.remove("selected");
+    });
+
+    button.classList.add("selected");
+}
+
+
+function nextOnboardingStep() {
+
+    if (onboardingStep === 1) {
+
+        const input =
+            document.getElementById("onboardingName");
+
+        const name = input.value.trim();
+
+        if (!name) {
+            alert("Please enter your name.");
+            return;
+        }
+
+        profileData.name = name;
+
+        onboardingStep = 2;
+        showOnboardingStep();
+        return;
+    }
+
+
+    if (onboardingStep === 2) {
+
+        if (!profileData.className) {
+            alert("Please choose your class.");
+            return;
+        }
+
+        onboardingStep = 3;
+        showOnboardingStep();
+        return;
+    }
+
+
+    if (onboardingStep === 3) {
+
+        if (!profileData.board) {
+            alert("Please choose your board.");
+            return;
+        }
+
+        const junior =
+            profileData.className === "Class 9" ||
+            profileData.className === "Class 10";
+
+        if (junior) {
+            onboardingStep = 4;
+        } else {
+            onboardingStep = 4;
+        }
+
+        showOnboardingStep();
+        return;
+    }
+
+
+    const junior =
+        profileData.className === "Class 9" ||
+        profileData.className === "Class 10";
+
+
+    if (onboardingStep === 4 && !junior) {
+
+        if (!profileData.stream) {
+            alert("Please choose your stream.");
+            return;
+        }
+
+        onboardingStep = 5;
+        showOnboardingStep();
+        return;
+    }
+
+
+    if (
+        (onboardingStep === 4 && junior) ||
+        onboardingStep === 5
+    ) {
+
+        const timeInput =
+            document.getElementById("onboardingFreeTime");
+
+        if (!timeInput.value) {
+            alert("Please choose your usual free time.");
+            return;
+        }
+
+        profileData.freeTime =
+            timeInput.value;
+
+        if (junior) {
+            profileData.stream = "";
+        }
+
+        saveProfile(profileData);
+        finishOnboarding();
+    }
+}
+
+
+function finishOnboarding() {
+
+    document.body.classList.remove("onboarding-active");
+
+    document.getElementById("onboarding")
+        .classList.add("hidden");
+
+    updateProfileDisplay();
+}
+
+
+function escapeHTML(value) {
+
+    return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+/* =========================
+   PROFILE DISPLAY
+========================= */
+
+function updateProfileDisplay() {
+
+    const profile = getProfile();
+
+    if (!profile) {
+        return;
+    }
+
+    profileData = profile;
+
+    document.title =
+        profile.name + " • Student Dashboard";
+
+    const greetingName =
+        document.getElementById("greeting");
+
+    const hour = new Date().getHours();
+
+    let greeting;
+
+    if (hour < 12) {
+        greeting = "Good morning";
+    } else if (hour < 17) {
+        greeting = "Good afternoon";
+    } else if (hour < 21) {
+        greeting = "Good evening";
+    } else {
+        greeting = "Good night";
+    }
+
+    greetingName.textContent =
+        greeting + ", " + profile.name + "! 👋";
+}
+
+
+function formatTime(time) {
+
+    if (!time) {
+        return "Not set";
+    }
+
+    const parts = time.split(":");
+
+    const hour =
+        Number(parts[0]);
+
+    const minute =
+        Number(parts[1]);
+
+    const suffix =
+        hour >= 12 ? "PM" : "AM";
+
+    const hour12 =
+        hour % 12 || 12;
+
+    return (
+        hour12 +
+        ":" +
+        String(minute).padStart(2, "0") +
+        " " +
+        suffix
+    );
+}
+
+
+function openProfile() {
+
+    const profile = getProfile();
+
+    if (!profile) {
+        return;
+    }
+
+    document.getElementById("profileName")
+        .textContent = profile.name;
+
+    document.getElementById("profileSubtitle")
+        .textContent =
+        profile.className +
+        " • " +
+        profile.board;
+
+    document.getElementById("profileClass")
+        .textContent = profile.className;
+
+    document.getElementById("profileBoard")
+        .textContent = profile.board;
+
+    const streamRow =
+        document.getElementById("profileStreamRow");
+
+    if (profile.stream) {
+        streamRow.style.display = "block";
+        document.getElementById("profileStream")
+            .textContent = profile.stream;
+    } else {
+        streamRow.style.display = "none";
+    }
+
+    document.getElementById("profileFreeTime")
+        .textContent = formatTime(profile.freeTime);
+
+    document.getElementById("profileView")
+        .style.display = "block";
+
+    document.getElementById("editProfileForm")
+        .classList.remove("show");
+
+    document.getElementById("profileModal")
+        .classList.add("show");
+}
+
+
+function closeProfile() {
+
+    document.getElementById("profileModal")
+        .classList.remove("show");
+}
+
+
+function closeProfileIfOutside(event) {
+
+    if (
+        event.target ===
+        document.getElementById("profileModal")
+    ) {
+        closeProfile();
+    }
+}
+
+
+function startEditProfile() {
+
+    const profile = getProfile();
+
+    document.getElementById("editName")
+        .value = profile.name;
+
+    document.getElementById("editClass")
+        .value = profile.className;
+
+    document.getElementById("editBoard")
+        .value = profile.board;
+
+    document.getElementById("editStream")
+        .value = profile.stream || "PCM";
+
+    document.getElementById("editFreeTime")
+        .value = profile.freeTime || "";
+
+    updateEditStreamVisibility();
+
+    document.getElementById("profileView")
+        .style.display = "none";
+
+    document.getElementById("editProfileForm")
+        .classList.add("show");
+}
+
+
+function updateEditStreamVisibility() {
+
+    const className =
+        document.getElementById("editClass").value;
+
+    const junior =
+        className === "Class 9" ||
+        className === "Class 10";
+
+    const group =
+        document.getElementById("streamEditGroup");
+
+    group.classList.toggle(
+        "show",
+        !junior
+    );
+}
+
+
+function cancelEditProfile() {
+
+    document.getElementById("editProfileForm")
+        .classList.remove("show");
+
+    document.getElementById("profileView")
+        .style.display = "block";
+}
+
+
+function saveEditedProfile() {
+
+    const name =
+        document.getElementById("editName")
+        .value.trim();
+
+    const className =
+        document.getElementById("editClass").value;
+
+    const board =
+        document.getElementById("editBoard").value;
+
+    const junior =
+        className === "Class 9" ||
+        className === "Class 10";
+
+    const stream =
+        junior
+        ? ""
+        : document.getElementById("editStream").value;
+
+    const freeTime =
+        document.getElementById("editFreeTime").value;
+
+    if (!name) {
+        alert("Please enter your name.");
+        return;
+    }
+
+    if (!freeTime) {
+        alert("Please choose your usual free time.");
+        return;
+    }
+
+    const updatedProfile = {
+        name: name,
+        className: className,
+        board: board,
+        stream: stream,
+        freeTime: freeTime
+    };
+
+    saveProfile(updatedProfile);
+    updateProfileDisplay();
+    openProfile();
+}
+
+
+
+/* =========================
+   QUICK CHECK V1
+========================= */
+
+function getLocalDateKey(date = new Date()) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+}
+
+function getQuickCheckDate() {
+    return localStorage.getItem("studentQuickCheckDate") || "";
+}
+
+function setQuickCheckDone() {
+    localStorage.setItem("studentQuickCheckDate", getLocalDateKey());
+}
+
+function openQuickCheck() {
+    const modal = document.getElementById("quickCheckModal");
+    if (modal) modal.classList.add("show");
+}
+
+function closeQuickCheck() {
+    const modal = document.getElementById("quickCheckModal");
+    if (modal) modal.classList.remove("show");
+}
+
+function closeQuickCheckIfOutside(event) {
+    if (event.target.id === "quickCheckModal") closeQuickCheck();
+}
+
+function quickCheckSelect(type) {
+    closeQuickCheck();
+
+    const typeSelect = document.getElementById("itemType");
+    if (typeSelect) typeSelect.value = type;
+
+    openForm();
+    updateCaptureForm();
+}
+
+function quickCheckNothing() {
+    setQuickCheckDone();
+    closeQuickCheck();
+
+    const subtitle = document.getElementById("dashboardSubtitle");
+    if (subtitle) {
+        subtitle.textContent = "You're all caught up for today. ✨";
+        setTimeout(function() {
+            subtitle.textContent = "Let's make sure nothing slips through the cracks.";
+        }, 3000);
+    }
+}
+
+function shouldShowAutomaticQuickCheck() {
+
+    const settings = getAppSettings();
+
+    if (!settings.quickCheck) return false;
+
+    const profile = getProfile();
+
+    if (!profile || !profile.freeTime) return false;
+    if (getQuickCheckDate() === getLocalDateKey()) return false;
+
+    const parts = profile.freeTime.split(":");
+    if (parts.length !== 2) return false;
+
+    const targetMinutes = Number(parts[0]) * 60 + Number(parts[1]);
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+    // Show within 90 minutes of the student's usual free time.
+    return Math.abs(currentMinutes - targetMinutes) <= 90;
+}
+
+function maybeShowQuickCheck() {
+    if (shouldShowAutomaticQuickCheck()) {
+        setTimeout(function() {
+            openQuickCheck();
+        }, 450);
+    }
+}
+
+
+/* =========================
+   OPEN FORM
+========================= */
+
+function openForm() {
+    const form = document.getElementById("addForm");
+    if (!form) return;
+    form.style.display = "block";
+    updateCaptureForm();
+}
+
+function closeForm() {
+    const form = document.getElementById("addForm");
+    if (form) form.style.display = "none";
+}
+
+function updateCaptureForm() {
+    const type = document.getElementById("itemType")?.value || "Other";
+    const title = document.getElementById("addFormTitle");
+    const helper = document.getElementById("addFormHelper");
+    const nameLabel = document.getElementById("itemNameLabel");
+    const nameInput = document.getElementById("itemName");
+    const dateLabel = document.getElementById("dateLabel");
+    const subject = document.getElementById("itemSubject");
+    const timeField = document.getElementById("timeField");
+
+    const copy = {
+        Test: {title:"Save your test", helper:"Capture the basics now. You can worry about studying later.", name:"Test / exam name", placeholder:"e.g. Physics Unit Test", date:"Test date"},
+        Homework: {title:"Save your homework", helper:"A tiny capture now means one less thing to remember tonight.", name:"What homework?", placeholder:"e.g. NCERT Ex 4.2", date:"Due date"},
+        Assignment: {title:"Save your assignment", helper:"Keep the deadline somewhere you’ll actually see it.", name:"Assignment name", placeholder:"e.g. Physics investigatory project", date:"Due date"},
+        Project: {title:"Save your project", helper:"Just capture the deadline. Details can come later.", name:"Project name", placeholder:"e.g. Chemistry project", date:"Due date"},
+        Other: {title:"Save it before you forget", helper:"Capture the important bit. You can fill in more later.", name:"What is it?", placeholder:"e.g. Bring chart paper tomorrow", date:"Date"}
+    }[type];
+
+    title.textContent = copy.title;
+    helper.textContent = copy.helper;
+    nameLabel.textContent = copy.name;
+    nameInput.placeholder = copy.placeholder;
+    dateLabel.textContent = copy.date;
+    timeField.style.display = type === "Test" ? "block" : "block";
+    subject.placeholder = type === "Other" ? "Optional" : "e.g. Physics";
+}
+
+function markQuickCheckCaptured() {
+    setQuickCheckDone();
+    const subtitle = document.getElementById("dashboardSubtitle");
+    if (subtitle) {
+        subtitle.textContent = "Got it — it’s on your list now. ✨";
+        setTimeout(function() {
+            subtitle.textContent = "Let's make sure nothing slips through the cracks.";
+        }, 3000);
+    }
+}
+
+
+/* =========================
+   GET SAVED ITEMS
+========================= */
+
+function getSavedItems() {
+
+    return JSON.parse(
+        localStorage.getItem("studentItems")
+        || "[]"
+    );
+}
+
+
+/* =========================
+   SAVE ITEMS
+========================= */
+
+function saveItems(items) {
+
+    localStorage.setItem(
+        "studentItems",
+        JSON.stringify(items)
+    );
+}
+
+
+/* =========================
+   FIX OLD ITEMS
+========================= */
+
+function migrateOldItems() {
+
+    const items = getSavedItems();
+    let changed = false;
+
+    items.forEach(function(item) {
+
+        if (!item.id) {
+
+            item.id =
+                Date.now() +
+                Math.random();
+
+            changed = true;
+        }
+
+        if (typeof item.completed !== "boolean") {
+
+            item.completed = false;
+            changed = true;
+        }
+
+        if (!item.subject) {
+            item.subject = "";
+            changed = true;
+        }
+
+        if (!item.source) {
+            item.source = "Other";
+            changed = true;
+        }
+
+        if (!item.icon) {
+
+            if (item.type === "Assignment") {
+                item.icon = "📚";
+            }
+            else if (item.type === "Project") {
+                item.icon = "📌";
+            }
+            else if (item.type === "Homework") {
+                item.icon = "📖";
+            }
+            else {
+                item.icon = "📝";
+            }
+
+            changed = true;
+        }
+    });
+
+    if (changed) {
+        saveItems(items);
+    }
+}
+
+
+/* =========================
+   ADD ITEM
+========================= */
+
+function addItem() {
+
+    const name =
+        document.getElementById("itemName")
+        .value
+        .trim();
+
+    const type =
+        document.getElementById("itemType")
+        .value;
+
+    const date =
+        document.getElementById("itemDate")
+        .value;
+
+    const time =
+        document.getElementById("itemTime")
+        .value;
+
+    if (name === "") {
+
+        alert("Please enter what you got.");
+        return;
+    }
+
+    let icon = "📝";
+
+    if (type === "Assignment") {
+        icon = "📚";
+    }
+    else if (type === "Project") {
+        icon = "📌";
+    }
+    else if (type === "Homework") {
+        icon = "📖";
+    }
+
+    const subject =
+        document.getElementById("itemSubject")?.value.trim() || "";
+
+    const source =
+        document.getElementById("itemSource")?.value || "Other";
+
+    const newItem = {
+        id: Date.now(),
+        name: name,
+        type: type,
+        subject: subject,
+        source: source,
+        date: date,
+        time: time,
+        icon: icon,
+        completed: false
+    };
+
+    const savedItems =
+        getSavedItems();
+
+    savedItems.push(newItem);
+
+    saveItems(savedItems);
+
+    addCardToPage(newItem);
+    updateSummary();
+    closeForm();
+    markQuickCheckCaptured();
+    updateWeekStrip();
+
+    document.getElementById("itemName").value = "";
+    document.getElementById("itemSubject").value = "";
+    document.getElementById("itemDate").value = "";
+    document.getElementById("itemTime").value = "";
+    document.getElementById("itemSource").value = "School";
+}
+
+
+/* =========================
+   MARK DONE / UNDO
+========================= */
+
+function markDone(button, itemId) {
+
+    const savedItems =
+        getSavedItems();
+
+    const item =
+        savedItems.find(
+            item => item.id === itemId
+        );
+
+    if (!item) {
+        return;
+    }
+
+    item.completed =
+        !item.completed;
+
+    saveItems(savedItems);
+
+    const card =
+        button.parentElement;
+
+    card.classList.toggle(
+        "completed",
+        item.completed
+    );
+
+    button.textContent =
+        item.completed
+        ? "↩ Undo"
+        : "✓ Done";
+
+    updateSummary();
+}
+
+
+/* =========================
+   DELETE ITEM
+========================= */
+
+function deleteItem(button, itemId) {
+
+    const confirmed =
+        confirm(
+            "Are you sure you want to delete this?"
+        );
+
+    if (!confirmed) {
+        return;
+    }
+
+    const savedItems =
+        getSavedItems();
+
+    const updatedItems =
+        savedItems.filter(
+            item => item.id !== itemId
+        );
+
+    saveItems(updatedItems);
+
+    const card =
+        button.parentElement;
+
+    card.remove();
+
+    updateSummary();
+}
+
+
+/* =========================
+   FORMAT DATE & TIME
+========================= */
+
+function formatDateTime(date, time) {
+
+    if (!date) {
+        return "No date";
+    }
+
+    const parts = date.split("-");
+
+    const taskDate = new Date(
+        Number(parts[0]),
+        Number(parts[1]) - 1,
+        Number(parts[2])
+    );
+
+    const today = new Date();
+
+    const todayDate = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate()
+    );
+
+    const tomorrow =
+        new Date(todayDate);
+
+    tomorrow.setDate(
+        tomorrow.getDate() + 1
+    );
+
+    let dateText;
+
+    if (
+        taskDate.getTime() ===
+        todayDate.getTime()
+    ) {
+
+        dateText = "Today";
+
+    } else if (
+        taskDate.getTime() ===
+        tomorrow.getTime()
+    ) {
+
+        dateText = "Tomorrow";
+
+    } else {
+
+        dateText =
+            taskDate.toLocaleDateString(
+                "en-IN",
+                {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "short"
+                }
+            );
+    }
+
+    if (time) {
+
+        const timeParts =
+            time.split(":");
+
+        const hours =
+            Number(timeParts[0]);
+
+        const minutes =
+            Number(timeParts[1]);
+
+        const suffix =
+            hours >= 12 ? "PM" : "AM";
+
+        const hour12 =
+            hours % 12 || 12;
+
+        const formattedTime =
+            hour12 +
+            ":" +
+            String(minutes).padStart(2, "0") +
+            " " +
+            suffix;
+
+        return dateText +
+            " • " +
+            formattedTime;
+    }
+
+    return dateText;
+}
+
+
+/* =========================
+   CREATE TASK CARD
+========================= */
+
+function addCardToPage(item) {
+
+    const newCard =
+        document.createElement("div");
+
+    newCard.className =
+        "task-card";
+
+    if (item.completed) {
+
+        newCard.classList.add(
+            "completed"
+        );
+    }
+
+    newCard.innerHTML = `
+        <div class="icon">
+            ${escapeHTML(item.icon)}
+        </div>
+
+        <div class="task-info">
+            <strong>
+                ${escapeHTML(item.name)}
+            </strong>
+
+            <span>
+                ${escapeHTML(item.subject ? item.subject + " • " : "")}
+                ${formatDateTime(item.date, item.time)}
+                ${item.source ? " • " + escapeHTML(item.source) : ""}
+            </span>
+        </div>
+
+        <button
+            class="done-button"
+            onclick="markDone(this, ${item.id})">
+
+            ${item.completed
+                ? "↩ Undo"
+                : "✓ Done"}
+
+        </button>
+
+        <button
+            class="delete-button"
+            onclick="deleteItem(this, ${item.id})">
+
+            🗑️
+
+        </button>
+    `;
+
+    const taskList = document.querySelector(".task-list");
+    if (taskList) {
+        taskList.appendChild(newCard);
+    }
+}
+
+
+/* =========================
+   LOAD SAVED ITEMS
+========================= */
+
+function loadSavedItems() {
+
+    migrateOldItems();
+
+    const savedItems =
+        getSavedItems();
+
+    savedItems.sort(function(a, b) {
+
+        if (a.completed && !b.completed) {
+            return 1;
+        }
+
+        if (!a.completed && b.completed) {
+            return -1;
+        }
+
+        if (!a.date && b.date) {
+            return 1;
+        }
+
+        if (a.date && !b.date) {
+            return -1;
+        }
+
+        if (!a.date && !b.date) {
+            return 0;
+        }
+
+        const dateA =
+            new Date(
+                a.date +
+                (a.time
+                    ? "T" + a.time
+                    : "T23:59")
+            );
+
+        const dateB =
+            new Date(
+                b.date +
+                (b.time
+                    ? "T" + b.time
+                    : "T23:59")
+            );
+
+        return (
+            dateA.getTime() -
+            dateB.getTime()
+        );
+    });
+
+    savedItems.forEach(
+        function(item) {
+            addCardToPage(item);
+        }
+    );
+
+    updateSummary();
+}
+
+
+/* =========================
+   UPDATE SUMMARY
+========================= */
+
+function updateSummary() {
+
+    const savedItems =
+        getSavedItems();
+
+    const today =
+        new Date();
+
+    const todayString =
+        today.getFullYear() +
+        "-" +
+        String(
+            today.getMonth() + 1
+        ).padStart(2, "0") +
+        "-" +
+        String(
+            today.getDate()
+        ).padStart(2, "0");
+
+    let todayCount = 0;
+    let weekCount = 0;
+
+    savedItems.forEach(
+        function(item) {
+
+            if (
+                item.date === todayString &&
+                !item.completed
+            ) {
+                todayCount++;
+            }
+
+            if (
+                item.date &&
+                !item.completed
+            ) {
+
+                const itemDate =
+                    new Date(
+                        item.date +
+                        "T00:00"
+                    );
+
+                const todayStart =
+                    new Date(
+                        today.getFullYear(),
+                        today.getMonth(),
+                        today.getDate()
+                    );
+
+                const difference =
+                    itemDate -
+                    todayStart;
+
+                const sevenDays =
+                    7 *
+                    24 *
+                    60 *
+                    60 *
+                    1000;
+
+                if (
+                    difference >= 0 &&
+                    difference <= sevenDays
+                ) {
+                    weekCount++;
+                }
+            }
+        }
+    );
+
+    document.getElementById(
+        "todayCount"
+    ).textContent =
+        todayCount;
+
+    document.getElementById(
+        "weekCount"
+    ).textContent =
+        weekCount;
+}
+
+
+/* =========================
+   GREETING
+========================= */
+
+function updateGreeting() {
+
+    const profile =
+        getProfile();
+
+    const hour =
+        new Date().getHours();
+
+    let greeting;
+
+    if (hour < 12) {
+        greeting = "Good morning";
+    }
+    else if (hour < 17) {
+        greeting = "Good afternoon";
+    }
+    else if (hour < 21) {
+        greeting = "Good evening";
+    }
+    else {
+        greeting = "Good night";
+    }
+
+    document.getElementById(
+        "greeting"
+    ).textContent =
+        profile
+        ? greeting + ", " + profile.name + "! 👋"
+        : greeting + "! 👋";
+}
+
+
+function updateTodayLabel() {
+    const label = document.getElementById("todayLabel");
+    if (!label) return;
+    const now = new Date();
+    label.textContent = now.toLocaleDateString(undefined, {
+        weekday: "long", month: "short", day: "numeric"
+    }).toUpperCase();
+}
+
+function updateWeekStrip() {
+    const strip = document.getElementById("weekStrip");
+    if (!strip) return;
+    const now = new Date();
+    const start = new Date(now);
+    const settings = getAppSettings();
+    const day = start.getDay();
+
+    if (settings.weekStart === "sunday") {
+        start.setDate(start.getDate() - day);
+    } else {
+        start.setDate(
+            start.getDate() -
+            (day === 0 ? 6 : day - 1)
+        );
+    }
+    const items = getSavedItems();
+    strip.innerHTML = "";
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(start);
+        d.setDate(start.getDate() + i);
+        const key = getLocalDateKey(d);
+        const hasItem = items.some(item => item.date === key && !item.completed);
+        const card = document.createElement("div");
+        card.className = "week-day" + (getLocalDateKey(now) === key ? " today" : "");
+        card.innerHTML = `<span class="day-name">${d.toLocaleDateString(undefined,{weekday:"short"})}</span><strong class="day-number">${d.getDate()}</strong>${hasItem ? '<span class="day-dot"></span>' : ''}`;
+        strip.appendChild(card);
+    }
+}
+/* =========================
+   V5 SIDEBAR NAVIGATION
+========================= */
+
+function showPage(page) {
+
+    const main = document.querySelector(".main");
+
+    if (!main) return;
+
+    const appPages =
+        document.querySelectorAll(".app-page");
+
+    /* Hide all extra pages */
+    appPages.forEach(function(section) {
+        section.classList.remove("show");
+    });
+
+    /* Show / hide existing dashboard content */
+    Array.from(main.children).forEach(function(child) {
+
+        if (child.classList.contains("app-page")) {
+            return;
+        }
+
+        child.style.display =
+            page === "home" ? "" : "none";
+    });
+
+    /* Show selected page */
+    if (page !== "home") {
+
+        const selected =
+            document.getElementById(page + "Page");
+
+        if (selected) {
+            selected.classList.add("show");
+        }
+    }
+
+    /* Update sidebar active state */
+    document
+        .querySelectorAll(".nav-item")
+        .forEach(function(button) {
+            button.classList.remove("active");
+        });
+
+    const navItems =
+        document.querySelectorAll(".nav-item");
+
+    navItems.forEach(function(button) {
+
+        const text =
+            button.innerText.trim().toLowerCase();
+
+        if (
+            (page === "home" && text.includes("home")) ||
+            (page === "tests" && text.includes("tests")) ||
+            (page === "tasks" && text.includes("tasks")) ||
+            (page === "calendar" && text.includes("calendar")) ||
+            (page === "explore" && text.includes("explore")) ||
+            (page === "settings" && text.includes("settings"))
+        ) {
+            button.classList.add("active");
+        }
+    });
+
+
+    /* Page-specific rendering */
+
+    if (page === "tasks") {
+        renderTasksPage();
+    }
+
+    if (page === "tests") {
+        renderTestsPage();
+    }
+
+    if (page === "calendar") {
+        renderCalendarPage();
+    }
+
+    if (page === "settings") {
+        renderSettingsPage();
+    }
+}
+
+
+/* =========================
+   TASKS PAGE
+========================= */
+
+function renderTasksPage() {
+
+    const container =
+        document.getElementById("allTasksList");
+
+    if (!container) return;
+
+    const items = getSavedItems();
+
+    container.innerHTML = "";
+
+    if (!items.length) {
+
+        container.innerHTML = `
+            <div class="page-empty">
+                <div>📋</div>
+                <strong>No tasks yet</strong>
+                <span>
+                    Add something through Quick Check
+                    and it'll appear here.
+                </span>
+            </div>
+        `;
+
+        return;
+    }
+
+    items.forEach(function(item) {
+
+        const card =
+            document.createElement("div");
+
+        card.className =
+            "page-task-card";
+
+        card.innerHTML = `
+            <div class="page-task-icon">
+                ${escapeHTML(item.icon || "📝")}
+            </div>
+
+            <div class="page-task-info">
+                <strong>
+                    ${escapeHTML(item.name)}
+                </strong>
+
+                <span>
+                    ${
+                        item.subject
+                            ? escapeHTML(item.subject) + " • "
+                            : ""
+                    }
+
+                    ${formatDateTime(
+                        item.date,
+                        item.time
+                    )}
+
+                    ${
+                        item.source
+                            ? " • " + escapeHTML(item.source)
+                            : ""
+                    }
+                </span>
+            </div>
+
+            <button
+                class="done-button"
+                onclick="
+                    markDone(this, ${item.id});
+                    renderTasksPage();
+                "
+            >
+                ${item.completed ? "↩ Undo" : "✓ Done"}
+            </button>
+        `;
+
+        container.appendChild(card);
+    });
+}
+
+
+/* =========================
+   TESTS PAGE
+========================= */
+
+function renderTestsPage() {
+
+    const container =
+        document.getElementById("testsList");
+
+    if (!container) return;
+
+    const tests =
+        getSavedItems().filter(function(item) {
+            return item.type === "Test";
+        });
+
+    container.innerHTML = "";
+
+    if (!tests.length) {
+
+        container.innerHTML = `
+            <div class="page-empty">
+                <div>📝</div>
+                <strong>No tests saved</strong>
+                <span>
+                    Tests captured through Quick Check
+                    will appear here.
+                </span>
+            </div>
+        `;
+
+        return;
+    }
+
+    tests.forEach(function(item) {
+
+        const card =
+            document.createElement("div");
+
+        card.className =
+            "page-task-card";
+
+        card.innerHTML = `
+            <div class="page-task-icon">📝</div>
+
+            <div class="page-task-info">
+                <strong>
+                    ${escapeHTML(item.name)}
+                </strong>
+
+                <span>
+                    ${
+                        item.subject
+                            ? escapeHTML(item.subject) + " • "
+                            : ""
+                    }
+
+                    ${formatDateTime(
+                        item.date,
+                        item.time
+                    )}
+
+                    ${
+                        item.source
+                            ? " • " + escapeHTML(item.source)
+                            : ""
+                    }
+                </span>
+            </div>
+
+            <button
+                class="done-button"
+                onclick="
+                    markDone(this, ${item.id});
+                    renderTestsPage();
+                "
+            >
+                ${item.completed ? "↩ Undo" : "✓ Done"}
+            </button>
+        `;
+
+        container.appendChild(card);
+    });
+}
+
+
+/* =========================
+   CALENDAR PAGE
+========================= */
+
+function renderCalendarPage() {
+
+    const strip =
+        document.getElementById("calendarWeekStrip");
+
+    const taskList =
+        document.getElementById("calendarDayTasks");
+
+    if (!strip || !taskList) return;
+
+    const now = new Date();
+
+    const start =
+        new Date(now);
+
+    const day =
+        start.getDay();
+
+    start.setDate(
+        start.getDate() -
+        (day === 0 ? 6 : day - 1)
+    );
+
+    strip.innerHTML = "";
+
+    const items =
+        getSavedItems();
+
+    let selectedKey =
+        getLocalDateKey(now);
+
+    function renderDay(key) {
+
+        selectedKey = key;
+
+        taskList.innerHTML = "";
+
+        const dayItems =
+            items.filter(function(item) {
+                return (
+                    item.date === key
+                );
+            });
+
+        if (!dayItems.length) {
+
+            taskList.innerHTML = `
+                <div class="page-empty">
+                    <div>✨</div>
+                    <strong>Nothing scheduled</strong>
+                    <span>
+                        Nothing captured for this day.
+                    </span>
+                </div>
+            `;
+
+            return;
+        }
+
+        dayItems.forEach(function(item) {
+
+            const card =
+                document.createElement("div");
+
+            card.className =
+                "page-task-card";
+
+            card.innerHTML = `
+                <div class="page-task-icon">
+                    ${escapeHTML(item.icon || "📝")}
+                </div>
+
+                <div class="page-task-info">
+                    <strong>
+                        ${escapeHTML(item.name)}
+                    </strong>
+
+                    <span>
+                        ${
+                            item.subject
+                                ? escapeHTML(item.subject) + " • "
+                                : ""
+                        }
+
+                        ${formatDateTime(
+                            item.date,
+                            item.time
+                        )}
+                    </span>
+                </div>
+            `;
+
+            taskList.appendChild(card);
+        });
+    }
+
+    for (let i = 0; i < 7; i++) {
+
+        const date =
+            new Date(start);
+
+        date.setDate(
+            start.getDate() + i
+        );
+
+        const key =
+            getLocalDateKey(date);
+
+        const hasItem =
+            items.some(function(item) {
+                return (
+                    item.date === key &&
+                    !item.completed
+                );
+            });
+
+        const dayCard =
+            document.createElement("div");
+
+        dayCard.className =
+            "calendar-day" +
+            (
+                key === selectedKey
+                    ? " selected"
+                    : ""
+            );
+
+        dayCard.innerHTML = `
+            <span class="calendar-day-name">
+                ${date.toLocaleDateString(
+                    undefined,
+                    { weekday: "short" }
+                )}
+            </span>
+
+            <strong class="calendar-day-number">
+                ${date.getDate()}
+            </strong>
+
+            ${
+                hasItem
+                    ? `<span class="calendar-dot"></span>`
+                    : ""
+            }
+        `;
+
+        dayCard.addEventListener(
+            "click",
+            function() {
+
+                document
+                    .querySelectorAll(".calendar-day")
+                    .forEach(function(day) {
+                        day.classList.remove("selected");
+                    });
+
+                dayCard.classList.add("selected");
+
+                renderDay(key);
+            }
+        );
+
+        strip.appendChild(dayCard);
+    }
+
+    renderDay(selectedKey);
+}
+
+
+/* =========================
+   SETTINGS — V6
+========================= */
+
+function getAppSettings() {
+
+    const defaults = {
+        theme: "system",
+        quickCheck: true,
+        taskReminders: true,
+        weekStart: "monday"
+    };
+
+    const saved = localStorage.getItem("nudgeSettings");
+
+    if (!saved) {
+        return defaults;
+    }
+
+    try {
+        const parsed = JSON.parse(saved);
+
+        return {
+            ...defaults,
+            ...(parsed && typeof parsed === "object" ? parsed : {})
+        };
+
+    } catch (error) {
+
+        console.log("Could not read saved settings.");
+
+        return defaults;
+    }
+}
+
+
+/* =========================
+   SAVE SETTING
+========================= */
+
+function saveSetting(key, value) {
+
+    const settings = getAppSettings();
+
+    settings[key] = value;
+
+    localStorage.setItem(
+        "nudgeSettings",
+        JSON.stringify(settings)
+    );
+
+    applySettings();
+
+    if (key === "weekStart") {
+
+        if (typeof updateWeekStrip === "function") {
+            updateWeekStrip();
+        }
+
+        if (typeof renderCalendarPage === "function") {
+            renderCalendarPage();
+        }
+    }
+
+    if (key === "quickCheck" && !value) {
+        closeQuickCheck();
+    }
+}
+
+
+/* =========================
+   APPLY SETTINGS
+========================= */
+
+function applySettings() {
+
+    const settings = getAppSettings();
+
+    let theme = settings.theme;
+
+    if (theme === "system") {
+        theme = window.matchMedia(
+            "(prefers-color-scheme: dark)"
+        ).matches
+            ? "dark"
+            : "light";
+    }
+
+    document.documentElement.dataset.theme = theme;
+}
+
+
+/* =========================
+   SETTINGS PAGE
+========================= */
+
+function renderSettingsPage() {
+
+    const settings = getAppSettings();
+
+    const theme =
+        document.getElementById("themeSetting");
+
+    const quickCheck =
+        document.getElementById("quickCheckSetting");
+
+    const taskReminders =
+        document.getElementById("taskReminderSetting");
+
+    const weekStart =
+        document.getElementById("weekStartSetting");
+
+
+    if (theme) {
+        theme.value = settings.theme;
+    }
+
+    if (quickCheck) {
+        quickCheck.checked = settings.quickCheck;
+    }
+
+    if (taskReminders) {
+        taskReminders.checked = settings.taskReminders;
+    }
+
+    if (weekStart) {
+        weekStart.value = settings.weekStart;
+    }
+}
+
+
+/* =========================
+   EXPORT STUDENT DATA
+========================= */
+
+function exportStudentData() {
+
+    const data = {
+        profile:
+            typeof getProfile === "function"
+                ? getProfile()
+                : null,
+
+        items:
+            typeof getSavedItems === "function"
+                ? getSavedItems()
+                : [],
+
+        settings:
+            getAppSettings(),
+
+        exportedAt:
+            new Date().toISOString()
+    };
+
+
+    const json =
+        JSON.stringify(data, null, 2);
+
+    const blob =
+        new Blob(
+            [json],
+            { type: "application/json" }
+        );
+
+    const url =
+        URL.createObjectURL(blob);
+
+    const link =
+        document.createElement("a");
+
+    link.href = url;
+    link.download = "nudge-student-data.json";
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+}
+
+
+/* =========================
+   RESET APP DATA
+========================= */
+
+function resetStudentData() {
+
+    const confirmed =
+        confirm(
+            "Are you sure you want to reset your Nudge data? This will delete your saved tasks, profile and settings from this browser."
+        );
+
+    if (!confirmed) {
+        return;
+    }
+
+    localStorage.removeItem("studentItems");
+    localStorage.removeItem("studentProfile");
+    localStorage.removeItem("studentQuickCheckDate");
+    localStorage.removeItem("nudgeSettings");
+
+    location.reload();
+}
+
+
+/* =========================
+   SETTINGS MESSAGE
+========================= */
+
+function showSettingsMessage(type) {
+
+    if (type === "Feedback") {
+
+        alert(
+            "Feedback isn't connected yet. We'll add this soon! ✨"
+        );
+
+        return;
+    }
+
+    alert(
+        "This setting isn't connected yet."
+    );
+}
+
+
+/* =========================
+   START APP
+========================= */
+
+applySettings();
+
+updateTodayLabel();
+updateGreeting();
+loadSavedItems();
+updateWeekStrip();
+maybeShowQuickCheck();
+checkProfile();
+
+</script>
+
+</body>
+</html>
