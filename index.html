@@ -593,9 +593,125 @@ header { display:flex; justify-content:space-between; align-items:flex-start; ma
 .capture-two-col { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
 .optional-label { color:#a0a6b5; font-weight:500; }
 .primary-form-button { background:var(--accent)!important; color:#fff!important; border-color:var(--accent)!important; }
-@media(max-width:850px){ .sidebar{width:78px;padding:22px 10px}.logo{justify-content:center;font-size:0}.logo-mark{font-size:15px}.nav-item{justify-content:center}.nav-item span{display:none}.main{padding:30px 24px}.welcome-copy h1{font-size:34px}.week-strip{grid-template-columns:repeat(4,1fr)} }
-@media(max-width:600px){ .capture-two-col{grid-template-columns:1fr}.main{padding:24px 16px}.header-actions .icon-button{display:none}.quick-check{padding:25px 22px}.quick-check p{font-size:22px}.task-card{grid-template-columns:44px 1fr}.task-card .done-button,.task-card .delete-button{grid-column:2}.week-strip{grid-template-columns:repeat(2,1fr)} }
-</style>
+@media(max-width:850px){
+    .sidebar{
+        position:fixed;
+        left:0;
+        bottom:0;
+        top:auto;
+        width:100%;
+        height:68px;
+        padding:6px 8px;
+        box-sizing:border-box;
+        border-right:0;
+        border-top:1px solid var(--line);
+        z-index:1000;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+    }
+
+    .sidebar .logo{
+        display:none;
+    }
+
+    .sidebar nav{
+        width:100%;
+        display:flex;
+        flex-direction:row;
+        justify-content:space-around;
+        gap:2px;
+    }
+
+    .sidebar .nav-item{
+        flex:1;
+        justify-content:center;
+        padding:8px 4px;
+        font-size:11px;
+        gap:3px;
+        min-width:0;
+    }
+
+    .sidebar .nav-item span{
+        display:block;
+        flex:0;
+        font-size:10px;
+    }
+
+    .sidebar .nav-item.settings{
+        margin-top:0;
+        position:absolute;
+        right:8px;
+        bottom:6px;
+        width:54px;
+        flex:none;
+        display:flex;
+    }
+
+    .main{
+        padding:30px 24px 95px;
+    }
+
+    .welcome-copy h1{
+        font-size:34px;
+    }
+
+    .week-strip{
+        grid-template-columns:repeat(4,1fr);
+    }
+}
+
+@media(max-width:600px){
+    .capture-two-col{
+        grid-template-columns:1fr;
+    }
+
+    .main{
+        padding:24px 16px 95px;
+    }
+
+    .header-actions .icon-button{
+        display:none;
+    }
+
+    .quick-check{
+        padding:25px 22px;
+    }
+
+    .quick-check p{
+        font-size:22px;
+    }
+
+    .task-card{
+        grid-template-columns:44px 1fr;
+    }
+
+    .task-card .done-button,
+    .task-card .delete-button{
+        grid-column:2;
+    }
+
+    .week-strip{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .sidebar{
+        height:72px;
+    }
+
+    .sidebar .nav-item{
+        font-size:10px;
+    }
+
+    .sidebar .nav-item span{
+        font-size:9px;
+    }
+
+    .sidebar .nav-item.settings{
+        right:4px;
+        width:48px;
+    }
+}</style>
 </head>
 
 <body>
@@ -3663,5 +3779,6 @@ checkProfile();
 <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "2f5b0652d25148b189dc50b2269bb6df"}'></script>
 <!-- End Cloudflare Web Analytics -->
 
+<script src="script.js"></script>
 </body>
 </html>
