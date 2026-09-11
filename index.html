@@ -2012,6 +2012,7 @@ function checkProfile() {
         document.body.classList.remove("onboarding-active");
         document.getElementById("onboarding").classList.add("hidden");
         updateProfileDisplay();
+        renderSubjectCards();
         return;
     }
 
@@ -2019,6 +2020,7 @@ function checkProfile() {
     document.getElementById("onboarding").classList.remove("hidden");
 
     showOnboardingStep();
+    renderSubjectCards();
 }
 
 
