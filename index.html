@@ -50,6 +50,64 @@
  .settings-row{gap:12px;padding-left:16px;padding-right:16px;}
 }
 </style>
+
+<style>
+/* HEADER SEARCH + NOTIFICATIONS */
+.nudge-popover{
+    position:fixed;
+    top:72px;
+    right:24px;
+    width:min(390px,calc(100vw - 32px));
+    background:var(--card,#fff);
+    border:1px solid var(--line,#e4e6ee);
+    border-radius:18px;
+    box-shadow:0 18px 45px rgba(20,24,45,.16);
+    z-index:3000;
+    overflow:hidden;
+}
+.nudge-popover-header{
+    padding:16px 18px 12px;
+    font-weight:800;
+    color:var(--text);
+}
+.nudge-search-wrap{padding:0 14px 14px;}
+.nudge-search-input{
+    width:100%;
+    box-sizing:border-box;
+    border:1px solid var(--line);
+    background:var(--bg,#f7f8fb);
+    color:var(--text);
+    border-radius:12px;
+    padding:11px 13px;
+    outline:none;
+    font:inherit;
+}
+.nudge-search-input:focus{border-color:#7477d8;}
+.nudge-results,.nudge-notifications{
+    max-height:360px;
+    overflow:auto;
+    padding:0 10px 10px;
+}
+.nudge-result,.nudge-notification{
+    display:flex;
+    gap:11px;
+    align-items:flex-start;
+    padding:12px 10px;
+    border-radius:12px;
+    cursor:pointer;
+}
+.nudge-result:hover,.nudge-notification:hover{background:var(--bg,#f7f8fb);}
+.nudge-result-icon{font-size:20px;line-height:1.2;}
+.nudge-result-info,.nudge-notification-info{min-width:0;flex:1;}
+.nudge-result-info strong,.nudge-notification-info strong{display:block;color:var(--text);font-size:14px;}
+.nudge-result-info span,.nudge-notification-info span{display:block;color:var(--muted);font-size:12px;margin-top:3px;}
+.nudge-empty{padding:22px 12px 24px;text-align:center;color:var(--muted);font-size:13px;}
+.nudge-notification-dot{width:8px;height:8px;border-radius:50%;background:#ff4d6d;margin-top:5px;flex:0 0 auto;}
+html[data-theme="dark"] .nudge-popover{box-shadow:0 18px 45px rgba(0,0,0,.35);}
+@media(max-width:600px){
+    .nudge-popover{top:auto;bottom:84px;right:12px;width:calc(100vw - 24px);}
+}
+</style>
 </head>
     <title>Nudge — Student Dashboard</title>
     <link rel="stylesheet" href="style.css">
@@ -915,8 +973,8 @@ header { display:flex; justify-content:space-between; align-items:flex-start; ma
 
             <div class="header-actions">
                 <button class="icon-button cloud-button" aria-label="Cloud" title="Cloud" onclick="showPage('cloud')">☁</button>
-                <button class="icon-button" aria-label="Search">⌕</button>
-                <button class="icon-button notification-button" aria-label="Notifications">♧<span></span></button>
+                <button class="icon-button search-button" aria-label="Search" title="Search" onclick="toggleSearchPanel()">⌕</button>
+                <button class="icon-button notification-button" aria-label="Notifications" title="Notifications" onclick="toggleNotificationPanel()">♧<span></span></button>
                 <div class="profile" onclick="openProfile()">👤</div>
             </div>
         </header>
@@ -3943,6 +4001,151 @@ loadSavedItems();
 updateWeekStrip();
 maybeShowQuickCheck();
 checkProfile();
+
+/* =========================
+   HEADER SEARCH + NOTIFICATIONS
+========================= */
+function closeHeaderPopovers() {
+    document.querySelectorAll(".nudge-popover").forEach(function(el) { el.remove(); });
+}
+
+function toggleSearchPanel() {
+    const existing = document.getElementById("nudgeSearchPopover");
+    if (existing) { existing.remove(); return; }
+    closeHeaderPopovers();
+
+    const panel = document.createElement("div");
+    panel.id = "nudgeSearchPopover";
+    panel.className = "nudge-popover";
+    panel.innerHTML = `
+        <div class="nudge-popover-header">Search Nudge</div>
+        <div class="nudge-search-wrap">
+            <input id="nudgeSearchInput" class="nudge-search-input" type="search" placeholder="Search tasks, tests, subjects..." autocomplete="off">
+        </div>
+        <div id="nudgeSearchResults" class="nudge-results"></div>
+    `;
+    document.body.appendChild(panel);
+
+    const input = document.getElementById("nudgeSearchInput");
+    renderNudgeSearchResults("");
+    input.focus();
+    input.addEventListener("input", function() { renderNudgeSearchResults(input.value); });
+}
+
+function renderNudgeSearchResults(query) {
+    const container = document.getElementById("nudgeSearchResults");
+    if (!container) return;
+    const items = typeof getSavedItems === "function" ? getSavedItems() : [];
+    const q = String(query || "").trim().toLowerCase();
+    const matches = items.filter(function(item) {
+        if (!q) return true;
+        return [item.name, item.type, item.subject, item.source, item.date]
+            .filter(Boolean).join(" ").toLowerCase().includes(q);
+    }).slice(0, 20);
+
+    if (!matches.length) {
+        container.innerHTML = '<div class="nudge-empty">Nothing found yet.</div>';
+        return;
+    }
+
+    container.innerHTML = matches.map(function(item) {
+        const meta = [item.type, item.subject, item.date ? formatDateTime(item.date, item.time) : ""]
+            .filter(Boolean).join(" • ");
+        return `
+            <div class="nudge-result" data-id="${escapeHTML(String(item.id))}">
+                <div class="nudge-result-icon">${escapeHTML(item.icon || "📝")}</div>
+                <div class="nudge-result-info">
+                    <strong>${escapeHTML(item.name || "Untitled")}</strong>
+                    <span>${escapeHTML(meta)}</span>
+                </div>
+            </div>`;
+    }).join("");
+
+    container.querySelectorAll(".nudge-result").forEach(function(row) {
+        row.addEventListener("click", function() { openSearchResult(row.dataset.id); });
+    });
+}
+
+function openSearchResult(id) {
+    closeHeaderPopovers();
+    const item = (typeof getSavedItems === "function" ? getSavedItems() : []).find(function(x) { return String(x.id) === String(id); });
+    if (item) showPage(item.type === "Test" ? "tests" : "tasks");
+}
+
+function toggleNotificationPanel() {
+    const existing = document.getElementById("nudgeNotificationPopover");
+    if (existing) { existing.remove(); return; }
+    closeHeaderPopovers();
+
+    const panel = document.createElement("div");
+    panel.id = "nudgeNotificationPopover";
+    panel.className = "nudge-popover";
+    panel.innerHTML = `
+        <div class="nudge-popover-header">Notifications</div>
+        <div id="nudgeNotificationList" class="nudge-notifications"></div>
+    `;
+    document.body.appendChild(panel);
+    renderNudgeNotifications();
+
+    const dot = document.querySelector(".notification-button span");
+    if (dot) dot.style.display = "none";
+}
+
+function renderNudgeNotifications() {
+    const container = document.getElementById("nudgeNotificationList");
+    if (!container) return;
+    const items = typeof getSavedItems === "function" ? getSavedItems() : [];
+    const now = new Date();
+    const weekAhead = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+    const upcoming = items.filter(function(item) {
+        if (item.completed || !item.date) return false;
+        const date = new Date(item.date + "T" + (item.time || "23:59"));
+        return !isNaN(date.getTime()) && date <= weekAhead;
+    }).sort(function(a,b) {
+        return new Date(a.date + "T" + (a.time || "23:59")) - new Date(b.date + "T" + (b.time || "23:59"));
+    }).slice(0, 10);
+
+    if (!upcoming.length) {
+        container.innerHTML = '<div class="nudge-empty">You’re all caught up. ✨</div>';
+        return;
+    }
+
+    container.innerHTML = upcoming.map(function(item) {
+        const date = new Date(item.date + "T" + (item.time || "23:59"));
+        const meta = (date < now ? "Overdue" : "Upcoming") + " • " + formatDateTime(item.date, item.time);
+        return `
+            <div class="nudge-notification" data-id="${escapeHTML(String(item.id))}">
+                <div class="nudge-notification-dot"></div>
+                <div class="nudge-notification-info">
+                    <strong>${escapeHTML(item.name || "Untitled")}</strong>
+                    <span>${escapeHTML(meta)}</span>
+                </div>
+            </div>`;
+    }).join("");
+
+    container.querySelectorAll(".nudge-notification").forEach(function(row) {
+        row.addEventListener("click", function() { openNotificationItem(row.dataset.id); });
+    });
+}
+
+function openNotificationItem(id) {
+    const item = (typeof getSavedItems === "function" ? getSavedItems() : []).find(function(x) { return String(x.id) === String(id); });
+    closeHeaderPopovers();
+    if (item) showPage(item.type === "Test" ? "tests" : "tasks");
+}
+
+document.addEventListener("keydown", function(event) {
+    if (event.key === "Escape") closeHeaderPopovers();
+});
+
+document.addEventListener("click", function(event) {
+    const panel = event.target.closest && event.target.closest(".nudge-popover");
+    const searchButton = event.target.closest && event.target.closest(".search-button");
+    const notificationButton = event.target.closest && event.target.closest(".notification-button");
+    if (!panel && !searchButton && !notificationButton) closeHeaderPopovers();
+});
+
 
 </script>
 
