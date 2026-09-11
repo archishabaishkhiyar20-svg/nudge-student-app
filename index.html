@@ -660,7 +660,8 @@ header { display:flex; justify-content:space-between; align-items:flex-start; ma
 .task-info { display:flex; flex-direction:column; gap:5px; min-width:0; }
 .task-info strong { font-size:16px; color:var(--text); }
 .task-info span { font-size:13px; color:var(--muted); }
-.done-button,.delete-button { border:1px solid var(--line); background:#fff; color:#5c6680; border-radius:10px; padding:8px 10px; cursor:pointer; font-weight:650; }
+.done-button,.delete-button,.edit-button { border:1px solid var(--line); background:#fff; color:#5c6680; border-radius:10px; padding:8px 10px; cursor:pointer; font-weight:650; }
+.edit-button:hover { background:#f1f0ff; color:#4f46e5; border-color:#d9d7ff; }
 .done-button:hover { background:#edfdf5; color:#15845b; border-color:#c9f1df; }
 .delete-button { color:#9a6170; }
 .week-strip { display:grid; grid-template-columns:repeat(7,1fr); gap:10px; }
@@ -793,7 +794,8 @@ header { display:flex; justify-content:space-between; align-items:flex-start; ma
     }
 
     .task-card .done-button,
-    .task-card .delete-button{
+    .task-card .delete-button,
+    .task-card .edit-button{
         grid-column:2;
     }
 
@@ -2589,6 +2591,46 @@ function maybeShowQuickCheck() {
 
 
 /* =========================
+   EDIT MODE
+========================= */
+
+let editingItemId = null;
+
+function openEditForm(itemId) {
+    const item = getSavedItems().find(function(savedItem) {
+        return String(savedItem.id) === String(itemId);
+    });
+
+    if (!item) return;
+
+    editingItemId = item.id;
+
+    const form = document.getElementById("addForm");
+    if (!form) return;
+
+    document.getElementById("addFormTitle").textContent = "Edit it";
+    document.getElementById("addFormHelper").textContent = "Update anything that changed. Your saved item will be replaced.";
+    document.getElementById("itemType").value = item.type || "Other";
+    document.getElementById("itemName").value = item.name || "";
+    document.getElementById("itemSubject").value = item.subject || "";
+    document.getElementById("itemSource").value = item.source || "Other";
+    document.getElementById("itemDate").value = item.date || "";
+    document.getElementById("itemTime").value = item.time || "";
+
+    updateCaptureForm();
+    document.getElementById("addFormTitle").textContent = "Edit it";
+    form.style.display = "block";
+}
+
+function resetEditMode() {
+    editingItemId = null;
+    const title = document.getElementById("addFormTitle");
+    const helper = document.getElementById("addFormHelper");
+    if (title) title.textContent = "Add something";
+    if (helper) helper.textContent = "Just the details you’ll want later. Nothing more.";
+}
+
+/* =========================
    OPEN FORM
 ========================= */
 
@@ -2602,6 +2644,7 @@ function openForm() {
 function closeForm() {
     const form = document.getElementById("addForm");
     if (form) form.style.display = "none";
+    resetEditMode();
 }
 
 function updateCaptureForm() {
@@ -2736,6 +2779,11 @@ function migrateOldItems() {
 
 function addItem() {
 
+    if (editingItemId !== null) {
+        updateExistingItem();
+        return;
+    }
+
     const name =
         document.getElementById("itemName")
         .value
@@ -2809,6 +2857,54 @@ function addItem() {
     document.getElementById("itemSource").value = "School";
 }
 
+
+/* =========================
+   UPDATE EXISTING ITEM
+========================= */
+
+function updateExistingItem() {
+    const name = document.getElementById("itemName").value.trim();
+    if (!name) {
+        alert("Please enter what you got.");
+        return;
+    }
+
+    const items = getSavedItems();
+    const item = items.find(function(savedItem) {
+        return String(savedItem.id) === String(editingItemId);
+    });
+
+    if (!item) {
+        closeForm();
+        return;
+    }
+
+    item.name = name;
+    item.type = document.getElementById("itemType").value;
+    item.subject = document.getElementById("itemSubject").value.trim();
+    item.source = document.getElementById("itemSource").value;
+    item.date = document.getElementById("itemDate").value;
+    item.time = document.getElementById("itemTime").value;
+
+    if (item.type === "Assignment") item.icon = "📚";
+    else if (item.type === "Project") item.icon = "📌";
+    else if (item.type === "Homework") item.icon = "📖";
+    else item.icon = "📝";
+
+    saveItems(items);
+    closeForm();
+
+    renderTasksPage();
+    renderTestsPage();
+    renderCalendarPage();
+    updateSummary();
+
+    const taskList = document.querySelector(".task-list");
+    if (taskList) {
+        taskList.innerHTML = "";
+        items.forEach(addCardToPage);
+    }
+}
 
 /* =========================
    MARK DONE / UNDO
@@ -3014,6 +3110,13 @@ function addCardToPage(item) {
                 ${item.source ? " • " + escapeHTML(item.source) : ""}
             </span>
         </div>
+
+        <button
+            class="edit-button"
+            onclick="openEditForm(${item.id})"
+            aria-label="Edit ${escapeHTML(item.name)}">
+            ✏️
+        </button>
 
         <button
             class="done-button"
@@ -3426,6 +3529,12 @@ function renderTasksPage() {
             </div>
 
             <button
+                class="edit-button"
+                onclick="openEditForm(${item.id})"
+                aria-label="Edit ${escapeHTML(item.name)}"
+            >✏️</button>
+
+            <button
                 class="done-button"
                 onclick="
                     markDone(this, ${item.id});
@@ -3510,6 +3619,12 @@ function renderTestsPage() {
                     }
                 </span>
             </div>
+
+            <button
+                class="edit-button"
+                onclick="openEditForm(${item.id})"
+                aria-label="Edit ${escapeHTML(item.name)}"
+            >✏️</button>
 
             <button
                 class="done-button"
