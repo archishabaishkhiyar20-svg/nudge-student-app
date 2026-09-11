@@ -1076,6 +1076,17 @@ header { display:flex; justify-content:space-between; align-items:flex-start; ma
             </div>
         </div>
 
+        <!-- SUBJECTS -->
+        <section class="dashboard-section subjects-section">
+            <div class="section-heading-row">
+                <div>
+                    <h2 class="section-title">Your subjects</h2>
+                    <p id="subjectsSubtitle" style="margin:5px 0 0;color:var(--muted);font-size:13px;"></p>
+                </div>
+            </div>
+            <div class="subjects-grid" id="subjectsGrid"></div>
+        </section>
+
         <!-- DON'T FORGET -->
         <section class="dashboard-section task-section">
             <div class="section-heading-row">
@@ -1528,6 +1539,22 @@ header { display:flex; justify-content:space-between; align-items:flex-start; ma
     .quick-check-options { grid-template-columns: 1fr; }
     .quick-check-options .nothing-option { grid-column: auto; }
 }
+/* =========================
+   SUBJECT CARDS
+========================= */
+.subjects-section{margin:42px 0;}
+.subjects-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;}
+.subject-card{position:relative;min-height:132px;padding:18px;border:1px solid var(--line);border-radius:18px;background:var(--card,#fff);box-sizing:border-box;box-shadow:0 8px 24px rgba(24,29,55,.06);}
+.subject-card-icon{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:#eef0ff;font-size:21px;margin-bottom:16px;}
+.subject-card strong{display:block;font-size:16px;color:var(--text);}
+.subject-card small{display:block;margin-top:5px;color:var(--muted);font-size:11px;}
+.subject-add-card{border:1.5px dashed #b9bdd0;background:transparent;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;cursor:pointer;color:var(--muted);}
+.subject-add-card .subject-card-icon{margin:0;background:transparent;font-size:25px;}
+.subject-add-card strong{color:var(--muted);}
+html[data-theme="dark"] .subject-card-icon{background:#292b48;}
+@media(max-width:850px){.subjects-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:600px){.subjects-section{margin:34px 0;}.subjects-grid{gap:10px;}.subject-card{min-height:118px;padding:15px;border-radius:16px;}.subject-card-icon{width:38px;height:38px;margin-bottom:12px;}.subject-card strong{font-size:14px;}.subject-card small{font-size:10px;}}
+
 /* =========================
    V5 SIDEBAR PAGES
 ========================= */
@@ -3458,6 +3485,140 @@ function showPage(page) {
     }
 }
 
+
+/* =========================
+   SUBJECT CARDS
+========================= */
+function getPresetSubjects(profile) {
+    if (!profile || !profile.className) return [];
+
+    const cls = profile.className;
+    const stream = (profile.stream || "").toLowerCase();
+
+    if (cls === "Class 9" || cls === "Class 10") {
+        return [
+            { name: "Mathematics", icon: "📐", type: "Core" },
+            { name: "Science", icon: "🔬", type: "Core" },
+            { name: "English", icon: "📖", type: "Core" },
+            { name: "Social Science", icon: "🌍", type: "Core" },
+            { name: "Second Language", icon: "🗣️", type: "Core" },
+            { name: "Computer / IT", icon: "💻", type: "Core" }
+        ];
+    }
+
+    if (stream === "pcm") {
+        return [
+            { name: "Physics", icon: "⚡", type: "PCM" },
+            { name: "Chemistry", icon: "🧪", type: "PCM" },
+            { name: "Mathematics", icon: "📐", type: "PCM" },
+            { name: "English", icon: "📖", type: "Core" }
+        ];
+    }
+
+    if (stream === "pcb") {
+        return [
+            { name: "Physics", icon: "⚡", type: "PCB" },
+            { name: "Chemistry", icon: "🧪", type: "PCB" },
+            { name: "Biology", icon: "🧬", type: "PCB" },
+            { name: "English", icon: "📖", type: "Core" }
+        ];
+    }
+
+    if (stream === "commerce") {
+        return [
+            { name: "Accountancy", icon: "🧾", type: "Commerce" },
+            { name: "Business Studies", icon: "💼", type: "Commerce" },
+            { name: "Economics", icon: "📊", type: "Commerce" },
+            { name: "English", icon: "📖", type: "Core" }
+        ];
+    }
+
+    if (stream === "humanities") {
+        return [
+            { name: "History", icon: "🏛️", type: "Humanities" },
+            { name: "Political Science", icon: "🏛️", type: "Humanities" },
+            { name: "Geography", icon: "🌍", type: "Humanities" },
+            { name: "English", icon: "📖", type: "Core" }
+        ];
+    }
+
+    return [];
+}
+
+function getCustomSubjects() {
+    try {
+        return JSON.parse(localStorage.getItem("nudgeCustomSubjects") || "[]");
+    } catch (e) {
+        return [];
+    }
+}
+
+function saveCustomSubjects(subjects) {
+    localStorage.setItem("nudgeCustomSubjects", JSON.stringify(subjects));
+}
+
+function renderSubjectCards() {
+    const grid = document.getElementById("subjectsGrid");
+    const subtitle = document.getElementById("subjectsSubtitle");
+    if (!grid) return;
+
+    const profile = getProfile();
+    const presets = getPresetSubjects(profile);
+    const custom = getCustomSubjects();
+    const presetNames = new Set(presets.map(s => s.name.toLowerCase()));
+    const subjects = presets.concat(custom.filter(s => !presetNames.has(String(s.name).toLowerCase())));
+
+    grid.innerHTML = "";
+
+    if (subtitle) {
+        subtitle.textContent = profile
+            ? profile.className + (profile.stream ? " • " + profile.stream : "")
+            : "Set up your profile to personalize your subjects.";
+    }
+
+    subjects.forEach(function(subject) {
+        const card = document.createElement("div");
+        card.className = "subject-card";
+        card.innerHTML = `
+            <div class="subject-card-icon">${escapeHTML(subject.icon || "📚")}</div>
+            <strong>${escapeHTML(subject.name)}</strong>
+            <small>${escapeHTML(subject.type || "Added")}</small>
+        `;
+        grid.appendChild(card);
+    });
+
+    const add = document.createElement("button");
+    add.type = "button";
+    add.className = "subject-card subject-add-card";
+    add.onclick = addCustomSubject;
+    add.innerHTML = `
+        <div class="subject-card-icon">＋</div>
+        <strong>Add subject</strong>
+    `;
+    grid.appendChild(add);
+}
+
+function addCustomSubject() {
+    const name = prompt("What subject do you want to add?");
+    if (!name) return;
+
+    const clean = name.trim();
+    if (!clean) return;
+
+    const profile = getProfile();
+    const allNames = getPresetSubjects(profile).concat(getCustomSubjects())
+        .map(s => String(s.name).toLowerCase());
+
+    if (allNames.includes(clean.toLowerCase())) {
+        alert("That subject is already there.");
+        return;
+    }
+
+    const custom = getCustomSubjects();
+    custom.push({ name: clean, icon: "📚", type: "Added" });
+    saveCustomSubjects(custom);
+    renderSubjectCards();
+}
 
 /* =========================
    TASKS PAGE
