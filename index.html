@@ -914,6 +914,7 @@ header { display:flex; justify-content:space-between; align-items:flex-start; ma
             </div>
 
             <div class="header-actions">
+                <button class="icon-button cloud-button" aria-label="Cloud" title="Cloud" onclick="showPage('cloud')">☁</button>
                 <button class="icon-button" aria-label="Search">⌕</button>
                 <button class="icon-button notification-button" aria-label="Notifications">♧<span></span></button>
                 <div class="profile" onclick="openProfile()">👤</div>
@@ -1095,6 +1096,37 @@ header { display:flex; justify-content:space-between; align-items:flex-start; ma
             Competitions, opportunities and useful resources
             will live here later.
         </span>
+    </div>
+
+</section>
+
+<section id="cloudPage" class="app-page">
+
+    <div class="page-header">
+        <span class="page-kicker">BACKUP & SYNC</span>
+        <h1>Cloud</h1>
+        <p>Keep a backup of your Nudge data and restore it anytime.</p>
+    </div>
+
+    <div class="cloud-card">
+        <div class="cloud-status">
+            <div class="cloud-icon">☁</div>
+            <div>
+                <strong id="cloudStatusTitle">Stored on this device</strong>
+                <span id="cloudStatusText">Your Nudge data is currently saved in this browser.</span>
+            </div>
+        </div>
+
+        <div class="cloud-actions">
+            <button class="primary-button" onclick="backupNudgeData()">↓ Create backup</button>
+            <label class="secondary-button" for="restoreNudgeInput">↑ Restore backup</label>
+            <input id="restoreNudgeInput" type="file" accept="application/json,.json" hidden onchange="restoreNudgeData(event)">
+        </div>
+
+        <div class="cloud-note">
+            <strong>Prototype note</strong>
+            <span>This version uses a backup file, not a real online cloud account. Your data is not uploaded anywhere.</span>
+        </div>
     </div>
 
 </section>
@@ -1804,6 +1836,36 @@ header { display:flex; justify-content:space-between; align-items:flex-start; ma
 .settings-about-text > span {
     font-size: 11px;
     color: #969bad;
+}
+
+/* =========================
+   CLOUD / BACKUP
+========================= */
+.cloud-card{
+    max-width:760px;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:24px;
+    box-shadow:0 8px 24px rgba(0,0,0,.04);
+}
+.cloud-status{display:flex;align-items:center;gap:16px;padding-bottom:22px;border-bottom:1px solid var(--line);}
+.cloud-icon{width:52px;height:52px;border-radius:15px;background:#ecebff;color:var(--accent);display:grid;place-items:center;font-size:28px;flex:none;}
+.cloud-status strong{display:block;font-size:16px;margin-bottom:5px;}
+.cloud-status span,.cloud-note span{display:block;color:var(--muted);font-size:13px;line-height:1.5;}
+.cloud-actions{display:flex;gap:10px;flex-wrap:wrap;padding:22px 0;}
+.primary-button,.secondary-button{border-radius:12px;padding:11px 16px;font:inherit;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;}
+.primary-button{border:0;background:var(--accent);color:#fff;}
+.secondary-button{border:1px solid var(--line);background:var(--card);color:var(--text);}
+.cloud-note{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:14px;}
+.cloud-note strong{display:block;font-size:13px;margin-bottom:4px;}
+html[data-theme="dark"] .cloud-icon{background:#29283f;color:#b9b4ff;}
+html[data-theme="dark"] .secondary-button{background:#1d1e26;color:#eee;}
+@media(max-width:600px){
+    .header-actions .cloud-button{display:grid;}
+    .cloud-card{padding:18px;}
+    .cloud-actions{flex-direction:column;}
+    .primary-button,.secondary-button{width:100%;box-sizing:border-box;}
 }
 </style>
 
@@ -3200,7 +3262,8 @@ function showPage(page) {
             (page === "tasks" && text.includes("tasks")) ||
             (page === "calendar" && text.includes("calendar")) ||
             (page === "explore" && text.includes("explore")) ||
-            (page === "settings" && text.includes("settings"))
+            (page === "settings" && text.includes("settings")) ||
+            (page === "cloud" && text.includes("cloud"))
         ) {
             button.classList.add("active");
         }
@@ -3699,6 +3762,74 @@ function renderSettingsPage() {
     if (weekStart) {
         weekStart.value = settings.weekStart;
     }
+}
+
+
+/* =========================
+   CLOUD / BACKUP
+========================= */
+
+function backupNudgeData() {
+    const data = {
+        profile: typeof getProfile === "function" ? getProfile() : null,
+        items: typeof getSavedItems === "function" ? getSavedItems() : [],
+        settings: typeof getAppSettings === "function" ? getAppSettings() : {},
+        exportedAt: new Date().toISOString(),
+        app: "Nudge"
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "nudge-backup-" + new Date().toISOString().slice(0,10) + ".json";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+
+    const title = document.getElementById("cloudStatusTitle");
+    const text = document.getElementById("cloudStatusText");
+    if (title) title.textContent = "Backup created";
+    if (text) text.textContent = "Your Nudge backup was downloaded to your device.";
+}
+
+function restoreNudgeData(event) {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function() {
+        try {
+            const data = JSON.parse(reader.result);
+            if (!data || typeof data !== "object" || !Array.isArray(data.items)) {
+                throw new Error("Invalid backup");
+            }
+
+            if (data.profile) {
+                localStorage.setItem("studentProfile", JSON.stringify(data.profile));
+            } else {
+                localStorage.removeItem("studentProfile");
+            }
+
+            localStorage.setItem("studentItems", JSON.stringify(data.items));
+
+            if (data.settings && typeof data.settings === "object") {
+                localStorage.setItem("nudgeSettings", JSON.stringify(data.settings));
+            }
+
+            if (data.quickCheckDate) {
+                localStorage.setItem("studentQuickCheckDate", data.quickCheckDate);
+            }
+
+            alert("Backup restored! Nudge will reload now.");
+            location.reload();
+        } catch (error) {
+            alert("That file doesn't look like a valid Nudge backup.");
+        }
+    };
+    reader.readAsText(file);
+    event.target.value = "";
 }
 
 
