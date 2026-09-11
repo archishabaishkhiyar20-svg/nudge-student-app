@@ -16,6 +16,33 @@
     </script>
 
     <style>
+
+<style>
+/* MOBILE LAYOUT FIX — NUDGE */
+@media (max-width:850px){
+ html,body{width:100%;min-height:100%;overflow-x:hidden;}
+ body{margin:0;}
+ .app{display:block!important;width:100%!important;min-height:100vh!important;}
+ .main{display:block!important;visibility:visible!important;opacity:1!important;width:100%!important;max-width:none!important;min-height:calc(100vh - 72px)!important;margin:0!important;box-sizing:border-box!important;padding:28px 18px 100px!important;position:relative!important;z-index:1!important;}
+ .main>header,.main>section,.main>div{max-width:100%;}
+ .sidebar{z-index:1000!important;}
+ .welcome-copy{min-width:0;}
+ .welcome-copy h1{font-size:32px!important;line-height:1.08!important;}
+ .welcome-copy p{font-size:14px!important;}
+ .quick-check{width:100%;box-sizing:border-box;}
+ .task-list,.page-list,.settings-list{width:100%;box-sizing:border-box;}
+ .app-page{width:100%;box-sizing:border-box;}
+}
+@media (max-width:600px){
+ .main{padding:24px 16px 100px!important;}
+ header{gap:14px;}
+ .welcome-copy h1{font-size:29px!important;}
+ .quick-check{padding:22px 18px!important;border-radius:18px;}
+ .quick-check p{font-size:20px!important;}
+ .settings-group,.page-empty,.task-card{max-width:100%;box-sizing:border-box;}
+ .settings-row{gap:12px;padding-left:16px;padding-right:16px;}
+}
+</style>
 </head>
     <title>Nudge — Student Dashboard</title>
     <link rel="stylesheet" href="style.css">
