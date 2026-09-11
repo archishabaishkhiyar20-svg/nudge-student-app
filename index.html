@@ -616,24 +616,24 @@ header { display:flex; justify-content:space-between; align-items:flex-start; ma
     }
 
     .sidebar nav{
-    width:calc(100% - 56px);
-    display:flex;
-    flex-direction:row;
-    justify-content:space-around;
-    align-items:center;
-    gap:2px;
     position:absolute;
     left:0;
+    right:58px;
     bottom:6px;
+    display:grid;
+    grid-template-columns:repeat(5, 1fr);
+    align-items:center;
+    gap:2px;
 }
     .sidebar .nav-item{
-        flex:1;
-        justify-content:center;
-        padding:8px 4px;
-        font-size:11px;
-        gap:3px;
-        min-width:0;
-    }
+    justify-content:center;
+    padding:7px 2px;
+    font-size:10px;
+    gap:3px;
+    min-width:0;
+    width:100%;
+    box-sizing:border-box;
+}
 
     .sidebar .nav-item span{
         display:block;
