@@ -3710,9 +3710,19 @@ function getPresetSubjects(profile) {
     return [];
 }
 
+function getCustomSubjects() {
+    try {
+        return JSON.parse(
+            localStorage.getItem("nudgeCustomSubjects") || "[]"
+        );
+    } catch (e) {
+        return [];
+    }
+}
+
 function saveCustomSubjects(subjects) {
     localStorage.setItem("nudgeCustomSubjects", JSON.stringify(subjects));
-}
+}    
     function renderSubjectPage() {
 
     const container = document.getElementById("subjectItemsList");
