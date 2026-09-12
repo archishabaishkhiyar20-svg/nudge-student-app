@@ -4070,6 +4070,13 @@ function renderTestsPage() {
    CALENDAR PAGE
 ========================= */
 
+let calendarWeekOffset = 0;
+
+function changeCalendarWeek(direction) {
+    calendarWeekOffset += direction;
+    renderCalendarPage();
+}
+
 function renderCalendarPage() {
 
     const strip =
@@ -4078,28 +4085,66 @@ function renderCalendarPage() {
     const taskList =
         document.getElementById("calendarDayTasks");
 
+    const weekLabel =
+        document.getElementById("calendarWeekLabel");
+
     if (!strip || !taskList) return;
 
     const now = new Date();
 
-    const start =
-        new Date(now);
+    const start = new Date(now);
 
-    const day =
-        start.getDay();
+    const day = start.getDay();
 
+    // Start from Monday
     start.setDate(
         start.getDate() -
         (day === 0 ? 6 : day - 1)
     );
 
+    // Move to selected week
+    start.setDate(
+        start.getDate() + (calendarWeekOffset * 7)
+    );
+
+    const items = getSavedItems();
+
     strip.innerHTML = "";
 
-    const items =
-        getSavedItems();
+    // Week label
+    if (weekLabel) {
 
-    let selectedKey =
-        getLocalDateKey(now);
+        if (calendarWeekOffset === 0) {
+            weekLabel.textContent = "This week";
+        } else if (calendarWeekOffset === 1) {
+            weekLabel.textContent = "Next week";
+        } else if (calendarWeekOffset === -1) {
+            weekLabel.textContent = "Last week";
+        } else {
+
+            const weekEnd = new Date(start);
+            weekEnd.setDate(start.getDate() + 6);
+
+            weekLabel.textContent =
+                start.toLocaleDateString(undefined, {
+                    month: "short",
+                    day: "numeric"
+                }) +
+                " – " +
+                weekEnd.toLocaleDateString(undefined, {
+                    month: "short",
+                    day: "numeric"
+                });
+        }
+    }
+
+    let selectedKey;
+
+    if (calendarWeekOffset === 0) {
+        selectedKey = getLocalDateKey(now);
+    } else {
+        selectedKey = getLocalDateKey(start);
+    }
 
     function renderDay(key) {
 
@@ -4109,9 +4154,7 @@ function renderCalendarPage() {
 
         const dayItems =
             items.filter(function(item) {
-                return (
-                    item.date === key
-                );
+                return item.date === key;
             });
 
         if (!dayItems.length) {
@@ -4180,6 +4223,7 @@ function renderCalendarPage() {
 
         const hasItem =
             items.some(function(item) {
+
                 return (
                     item.date === key &&
                     !item.completed
@@ -4237,7 +4281,6 @@ function renderCalendarPage() {
 
     renderDay(selectedKey);
 }
-
 
 /* =========================
    SETTINGS — V6
