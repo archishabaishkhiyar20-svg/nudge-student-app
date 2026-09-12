@@ -1198,13 +1198,7 @@ header { display:flex; justify-content:space-between; align-items:flex-start; ma
         <p>A simple view of what's happening this week.</p>
     </div>
 
-    <div class="calendar-navigation">
-    <button type="button" onclick="changeCalendarWeek(-1)">←</button>
-    <strong id="calendarWeekLabel">This week</strong>
-    <button type="button" onclick="changeCalendarWeek(1)">→</button>
-</div>
-
-<div id="calendarWeekStrip" class="calendar-week-strip"></div>
+    <div id="calendarWeekStrip" class="calendar-week-strip"></div>
 
     <div id="calendarDayTasks" class="page-list"></div>
 
@@ -3516,63 +3510,11 @@ function updateWeekStrip() {
         const key = getLocalDateKey(d);
         const hasItem = items.some(item => item.date === key && !item.completed);
         const card = document.createElement("div");
-
-card.className =
-    "week-day" +
-    (getLocalDateKey(now) === key ? " today" : "");
-
-card.innerHTML = `
-    <span class="day-name">
-        ${d.toLocaleDateString(undefined, {
-            weekday: "short"
-        })}
-    </span>
-
-    <strong class="day-number">
-        ${d.getDate()}
-    </strong>
-
-    ${
-        hasItem
-            ? '<span class="day-dot"></span>'
-            : ''
+        card.className = "week-day" + (getLocalDateKey(now) === key ? " today" : "");
+        card.innerHTML = `<span class="day-name">${d.toLocaleDateString(undefined,{weekday:"short"})}</span><strong class="day-number">${d.getDate()}</strong>${hasItem ? '<span class="day-dot"></span>' : ''}`;
+        strip.appendChild(card);
     }
-`;
-
-card.addEventListener("click", function() {
-
-    const dayItems = items.filter(function(item) {
-        return item.date === key;
-    });
-
-    if (!dayItems.length) {
-        alert("Nothing is due on this day.");
-        return;
-    }
-
-    const details = dayItems.map(function(item) {
-        return (
-            (item.icon || "📝") +
-            " " +
-            item.name +
-            (item.subject
-                ? " — " + item.subject
-                : "")
-        );
-    }).join("\n");
-
-    alert(
-        d.toLocaleDateString(undefined, {
-            weekday: "long",
-            month: "short",
-            day: "numeric"
-        }) +
-        "\n\n" +
-        details
-    );
-});
-
-strip.appendChild(card);
+}
 /* =========================
    V5 SIDEBAR NAVIGATION
 ========================= */
@@ -4122,13 +4064,6 @@ function renderTestsPage() {
    CALENDAR PAGE
 ========================= */
 
-let calendarWeekOffset = 0;
-
-function changeCalendarWeek(direction) {
-    calendarWeekOffset += direction;
-    renderCalendarPage();
-}
-
 function renderCalendarPage() {
 
     const strip =
@@ -4137,66 +4072,28 @@ function renderCalendarPage() {
     const taskList =
         document.getElementById("calendarDayTasks");
 
-    const weekLabel =
-        document.getElementById("calendarWeekLabel");
-
     if (!strip || !taskList) return;
 
     const now = new Date();
 
-    const start = new Date(now);
+    const start =
+        new Date(now);
 
-    const day = start.getDay();
+    const day =
+        start.getDay();
 
-    // Start from Monday
     start.setDate(
         start.getDate() -
         (day === 0 ? 6 : day - 1)
     );
 
-    // Move to selected week
-    start.setDate(
-        start.getDate() + (calendarWeekOffset * 7)
-    );
-
-    const items = getSavedItems();
-
     strip.innerHTML = "";
 
-    // Week label
-    if (weekLabel) {
+    const items =
+        getSavedItems();
 
-        if (calendarWeekOffset === 0) {
-            weekLabel.textContent = "This week";
-        } else if (calendarWeekOffset === 1) {
-            weekLabel.textContent = "Next week";
-        } else if (calendarWeekOffset === -1) {
-            weekLabel.textContent = "Last week";
-        } else {
-
-            const weekEnd = new Date(start);
-            weekEnd.setDate(start.getDate() + 6);
-
-            weekLabel.textContent =
-                start.toLocaleDateString(undefined, {
-                    month: "short",
-                    day: "numeric"
-                }) +
-                " – " +
-                weekEnd.toLocaleDateString(undefined, {
-                    month: "short",
-                    day: "numeric"
-                });
-        }
-    }
-
-    let selectedKey;
-
-    if (calendarWeekOffset === 0) {
-        selectedKey = getLocalDateKey(now);
-    } else {
-        selectedKey = getLocalDateKey(start);
-    }
+    let selectedKey =
+        getLocalDateKey(now);
 
     function renderDay(key) {
 
@@ -4206,7 +4103,9 @@ function renderCalendarPage() {
 
         const dayItems =
             items.filter(function(item) {
-                return item.date === key;
+                return (
+                    item.date === key
+                );
             });
 
         if (!dayItems.length) {
@@ -4275,7 +4174,6 @@ function renderCalendarPage() {
 
         const hasItem =
             items.some(function(item) {
-
                 return (
                     item.date === key &&
                     !item.completed
@@ -4333,6 +4231,7 @@ function renderCalendarPage() {
 
     renderDay(selectedKey);
 }
+
 
 /* =========================
    SETTINGS — V6
@@ -4795,7 +4694,5 @@ document.addEventListener("click", function(event) {
 <!-- Cloudflare Web Analytics -->
 <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "2f5b0652d25148b189dc50b2269bb6df"}'></script>
 <!-- End Cloudflare Web Analytics -->
-
-x`
 </body>
 </html>
