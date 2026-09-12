@@ -1198,7 +1198,13 @@ header { display:flex; justify-content:space-between; align-items:flex-start; ma
         <p>A simple view of what's happening this week.</p>
     </div>
 
-    <div id="calendarWeekStrip" class="calendar-week-strip"></div>
+    <div class="calendar-navigation">
+    <button type="button" onclick="changeCalendarWeek(-1)">←</button>
+    <strong id="calendarWeekLabel">This week</strong>
+    <button type="button" onclick="changeCalendarWeek(1)">→</button>
+</div>
+
+<div id="calendarWeekStrip" class="calendar-week-strip"></div>
 
     <div id="calendarDayTasks" class="page-list"></div>
 
