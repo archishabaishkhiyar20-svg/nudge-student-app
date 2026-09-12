@@ -3485,10 +3485,10 @@ function updateTodayLabel() {
         weekday: "long", month: "short", day: "numeric"
     }).toUpperCase();
 }
-
 function updateWeekStrip() {
     const strip = document.getElementById("weekStrip");
     if (!strip) return;
+
     const now = new Date();
     const start = new Date(now);
     const settings = getAppSettings();
@@ -3502,16 +3502,73 @@ function updateWeekStrip() {
             (day === 0 ? 6 : day - 1)
         );
     }
+
     const items = getSavedItems();
     strip.innerHTML = "";
+
     for (let i = 0; i < 7; i++) {
         const d = new Date(start);
         d.setDate(start.getDate() + i);
+
         const key = getLocalDateKey(d);
-        const hasItem = items.some(item => item.date === key && !item.completed);
+
+        const dayItems = items.filter(function(item) {
+            return item.date === key;
+        });
+
+        const hasItem = dayItems.some(function(item) {
+            return !item.completed;
+        });
+
         const card = document.createElement("div");
-        card.className = "week-day" + (getLocalDateKey(now) === key ? " today" : "");
-        card.innerHTML = `<span class="day-name">${d.toLocaleDateString(undefined,{weekday:"short"})}</span><strong class="day-number">${d.getDate()}</strong>${hasItem ? '<span class="day-dot"></span>' : ''}`;
+
+        card.className =
+            "week-day" +
+            (getLocalDateKey(now) === key ? " today" : "");
+
+        card.innerHTML = `
+            <span class="day-name">
+                ${d.toLocaleDateString(undefined, {
+                    weekday: "short"
+                })}
+            </span>
+
+            <strong class="day-number">
+                ${d.getDate()}
+            </strong>
+
+            ${hasItem ? '<span class="day-dot"></span>' : ""}
+        `;
+
+        card.addEventListener("click", function() {
+            if (!dayItems.length) {
+                alert("Nothing is due on this day.");
+                return;
+            }
+
+            const details = dayItems.map(function(item) {
+                return (
+                    (item.completed ? "✓ " : "• ") +
+                    (item.icon || "📝") +
+                    " " +
+                    item.name +
+                    (item.subject
+                        ? " — " + item.subject
+                        : "")
+                );
+            }).join("\n");
+
+            alert(
+                d.toLocaleDateString(undefined, {
+                    weekday: "long",
+                    month: "long",
+                    day: "numeric"
+                }) +
+                "\n\n" +
+                details
+            );
+        });
+
         strip.appendChild(card);
     }
 }
