@@ -3001,6 +3001,63 @@ function addItem() {
     document.getElementById("itemTime").value = "";
     document.getElementById("itemSource").value = "School";
 }
+    function openWeekDayModal(dateKey) {
+    const modal = document.getElementById("weekDayModal");
+    const title = document.getElementById("weekDayModalTitle");
+    const itemsContainer = document.getElementById("weekDayModalItems");
+
+    if (!modal || !title || !itemsContainer) return;
+
+    const items = getSavedItems().filter(function(item) {
+        return item.date === dateKey;
+    });
+
+    const date = new Date(dateKey + "T00:00");
+
+    title.textContent = date.toLocaleDateString(undefined, {
+        weekday: "long",
+        month: "long",
+        day: "numeric"
+    });
+
+    if (!items.length) {
+        itemsContainer.innerHTML = `
+            <div class="week-day-modal-item">
+                <div class="week-day-modal-item-name">
+                    Nothing scheduled 🎉
+                </div>
+            </div>
+        `;
+    } else {
+        itemsContainer.innerHTML = items.map(function(item) {
+            return `
+                <div class="week-day-modal-item">
+                    <div class="week-day-modal-item-name">
+                        ${item.icon || "📝"} ${escapeHTML(item.name)}
+                    </div>
+
+                    <div class="week-day-modal-item-meta">
+                        ${item.subject ? "📚 " + escapeHTML(item.subject) + "<br>" : ""}
+                        ${item.type ? "🏷️ " + escapeHTML(item.type) + "<br>" : ""}
+                        ${item.time ? "⏰ " + escapeHTML(item.time) + "<br>" : ""}
+                        ${item.source ? "📌 " + escapeHTML(item.source) + "<br>" : ""}
+                        ${item.completed ? "✅ Completed" : "🔵 Not completed"}
+                    </div>
+                </div>
+            `;
+        }).join("");
+    }
+
+    modal.classList.remove("hidden");
+}
+
+function closeWeekDayModal() {
+    const modal = document.getElementById("weekDayModal");
+
+    if (modal) {
+        modal.classList.add("hidden");
+    }
+}
 
 
 /* =========================
@@ -4751,5 +4808,25 @@ document.addEventListener("click", function(event) {
 <!-- Cloudflare Web Analytics -->
 <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "2f5b0652d25148b189dc50b2269bb6df"}'></script>
 <!-- End Cloudflare Web Analytics -->
+    <div id="weekDayModal" class="week-day-modal hidden">
+    <div class="week-day-modal-overlay" onclick="closeWeekDayModal()"></div>
+
+    <div class="week-day-modal-card">
+        <button
+            class="week-day-modal-close"
+            onclick="closeWeekDayModal()"
+            aria-label="Close">
+            ×
+        </button>
+
+        <div class="week-day-modal-icon">📅</div>
+
+        <span class="page-kicker">DUE ON</span>
+
+        <h2 id="weekDayModalTitle">Saturday, September 12</h2>
+
+        <div id="weekDayModalItems"></div>
+    </div>
+</div>
 </body>
 </html>
