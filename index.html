@@ -3642,9 +3642,25 @@ function getPresetSubjects(profile) {
     if (!profile || !profile.className) return [];
 
     const cls = profile.className;
+    const board = (profile.board || "").toLowerCase();
     const stream = (profile.stream || "").toLowerCase();
 
     if (cls === "Class 9" || cls === "Class 10") {
+
+        if (board.includes("icse")) {
+            return [
+                { name: "English", icon: "📖", type: "Core" },
+                { name: "Second Language", icon: "🗣️", type: "Core" },
+                { name: "Mathematics", icon: "📐", type: "Core" },
+                { name: "Physics", icon: "⚡", type: "Science" },
+                { name: "Chemistry", icon: "🧪", type: "Science" },
+                { name: "Biology", icon: "🧬", type: "Science" },
+                { name: "History & Civics", icon: "🏛️", type: "Humanities" },
+                { name: "Geography", icon: "🌍", type: "Humanities" },
+                { name: "Computer Applications", icon: "💻", type: "Core" }
+            ];
+        }
+
         return [
             { name: "Mathematics", icon: "📐", type: "Core" },
             { name: "Science", icon: "🔬", type: "Core" },
@@ -3692,14 +3708,6 @@ function getPresetSubjects(profile) {
     }
 
     return [];
-}
-
-function getCustomSubjects() {
-    try {
-        return JSON.parse(localStorage.getItem("nudgeCustomSubjects") || "[]");
-    } catch (e) {
-        return [];
-    }
 }
 
 function saveCustomSubjects(subjects) {
