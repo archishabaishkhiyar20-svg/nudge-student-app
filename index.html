@@ -1118,7 +1118,52 @@ header { display:flex; justify-content:space-between; align-items:flex-start; ma
 <!-- =========================
      V5 PAGES
 ========================= -->
+<section id="subjectPage" class="app-page">
 
+    <div class="subject-page-top">
+        <button
+            class="subject-back-button"
+            type="button"
+            onclick="showPage('home')">
+            ← Back
+        </button>
+    </div>
+
+    <div class="page-header subject-page-header">
+
+        <div id="subjectPageIcon" class="subject-page-icon">
+            📚
+        </div>
+
+        <span class="page-kicker">SUBJECT</span>
+
+        <h1 id="subjectPageTitle">
+            Subject
+        </h1>
+
+        <p id="subjectPageSubtitle">
+            Everything you've added for this subject.
+        </p>
+
+    </div>
+
+    <div class="subject-page-actions">
+
+        <button
+            class="primary-button"
+            type="button"
+            onclick="addItemForCurrentSubject()">
+            ＋ Add something
+        </button>
+
+    </div>
+
+    <div
+        id="subjectItemsList"
+        class="page-list">
+    </div>
+
+</section>
 <section id="tasksPage" class="app-page">
 
     <div class="page-header">
@@ -1551,6 +1596,68 @@ header { display:flex; justify-content:space-between; align-items:flex-start; ma
 .subject-add-card{border:1.5px dashed #b9bdd0;background:transparent;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;cursor:pointer;color:var(--muted);}
 .subject-add-card .subject-card-icon{margin:0;background:transparent;font-size:25px;}
 .subject-add-card strong{color:var(--muted);}
+
+    .subject-open-card {
+    width: 100%;
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+    transition: transform .15s ease,
+                box-shadow .15s ease,
+                border-color .15s ease;
+}
+
+.subject-open-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(24,29,55,.10);
+    border-color: #c5c8dc;
+}
+
+.subject-page-top {
+    margin-bottom: 14px;
+}
+
+.subject-back-button {
+    border: 1px solid var(--line);
+    background: var(--card,#fff);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.subject-page-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 15px;
+    display: grid;
+    place-items: center;
+    background: #eef0ff;
+    font-size: 26px;
+    margin-bottom: 14px;
+}
+
+.subject-page-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin: 18px 0 22px;
+}
+
+html[data-theme="dark"] .subject-page-icon {
+    background: #292b48;
+}
+
+@media(max-width:600px) {
+
+    .subject-page-actions {
+        justify-content: stretch;
+    }
+
+    .subject-page-actions .primary-button {
+        width: 100%;
+    }
+
+}
 html[data-theme="dark"] .subject-card-icon{background:#292b48;}
 @media(max-width:850px){.subjects-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
 @media(max-width:600px){.subjects-section{margin:34px 0;}.subjects-grid{gap:10px;}.subject-card{min-height:118px;padding:15px;border-radius:16px;}.subject-card-icon{width:38px;height:38px;margin-bottom:12px;}.subject-card strong{font-size:14px;}.subject-card small{font-size:10px;}}
@@ -2667,6 +2774,17 @@ function openForm() {
     form.style.display = "block";
     updateCaptureForm();
 }
+    function addItemForCurrentSubject() {
+
+    openForm();
+
+    const subjectInput =
+        document.getElementById("itemSubject");
+
+    if (subjectInput) {
+        subjectInput.value = currentSubjectName;
+    }
+}
 
 function closeForm() {
     const form = document.getElementById("addForm");
@@ -3400,6 +3518,37 @@ function updateWeekStrip() {
 /* =========================
    V5 SIDEBAR NAVIGATION
 ========================= */
+    let currentSubjectName = "";
+
+function showSubjectPage(subjectName, icon) {
+
+    currentSubjectName = String(subjectName || "").trim();
+
+    const title = document.getElementById("subjectPageTitle");
+    const subtitle = document.getElementById("subjectPageSubtitle");
+    const subjectIcon = document.getElementById("subjectPageIcon");
+
+    if (title) {
+        title.textContent = currentSubjectName || "Subject";
+    }
+
+    if (subjectIcon) {
+        subjectIcon.textContent = icon || "📚";
+    }
+
+    const profile = getProfile();
+
+    if (subtitle) {
+        subtitle.textContent = profile
+            ? profile.className
+              + (profile.stream ? " • " + profile.stream : "")
+              + " • " + currentSubjectName
+            : "Everything you've added for this subject.";
+    }
+
+    showPage("subject");
+    renderSubjectPage();
+}
 
 function showPage(page) {
 
@@ -3556,6 +3705,89 @@ function getCustomSubjects() {
 function saveCustomSubjects(subjects) {
     localStorage.setItem("nudgeCustomSubjects", JSON.stringify(subjects));
 }
+    function renderSubjectPage() {
+
+    const container = document.getElementById("subjectItemsList");
+
+    if (!container) return;
+
+    const subject = currentSubjectName.toLowerCase();
+
+    const items = getSavedItems()
+        .filter(function(item) {
+            return String(item.subject || "")
+                .trim()
+                .toLowerCase() === subject;
+        })
+        .sort(function(a, b) {
+            return String(a.date || "")
+                .localeCompare(String(b.date || ""));
+        });
+
+    container.innerHTML = "";
+
+    if (!items.length) {
+
+        container.innerHTML = `
+            <div class="page-empty">
+                <div>📚</div>
+                <strong>Nothing here yet</strong>
+                <span>
+                    Add a task or test for
+                    ${escapeHTML(currentSubjectName)}
+                    and it'll appear here.
+                </span>
+            </div>
+        `;
+
+        return;
+    }
+
+    items.forEach(function(item) {
+
+        const card = document.createElement("div");
+
+        card.className = "page-task-card";
+
+        card.innerHTML = `
+            <div class="page-task-icon">
+                ${escapeHTML(item.icon || "📝")}
+            </div>
+
+            <div class="page-task-info">
+
+                <strong>
+                    ${escapeHTML(item.name || "Untitled")}
+                </strong>
+
+                <span>
+                    ${escapeHTML(item.type || "Other")}
+                    •
+                    ${formatDateTime(item.date, item.time)}
+                    ${item.source
+                        ? " • " + escapeHTML(item.source)
+                        : ""}
+                </span>
+
+            </div>
+
+            <button
+                class="edit-button"
+                onclick="openEditForm(${item.id})"
+                aria-label="Edit ${escapeHTML(item.name || "item")}">
+                ✏️
+            </button>
+
+            <button
+                class="done-button"
+                onclick="markDone(this, ${item.id}); renderSubjectPage();">
+                ${item.completed ? "↩ Undo" : "✓ Done"}
+            </button>
+        `;
+
+        container.appendChild(card);
+    });
+}
 
 function renderSubjectCards() {
     const grid = document.getElementById("subjectsGrid");
@@ -3576,17 +3808,24 @@ function renderSubjectCards() {
             : "Set up your profile to personalize your subjects.";
     }
 
-    subjects.forEach(function(subject) {
-        const card = document.createElement("div");
-        card.className = "subject-card";
-        card.innerHTML = `
-            <div class="subject-card-icon">${escapeHTML(subject.icon || "📚")}</div>
-            <strong>${escapeHTML(subject.name)}</strong>
-            <small>${escapeHTML(subject.type || "Added")}</small>
-        `;
-        grid.appendChild(card);
-    });
+subjects.forEach(function(subject) {
+    const card = document.createElement("button");
 
+    card.type = "button";
+    card.className = "subject-card subject-open-card";
+
+    card.onclick = function() {
+        showSubjectPage(subject.name, subject.icon || "📚");
+    };
+
+    card.innerHTML = `
+        <div class="subject-card-icon">${escapeHTML(subject.icon || "📚")}</div>
+        <strong>${escapeHTML(subject.name)}</strong>
+        <small>${escapeHTML(subject.type || "Added")}</small>
+    `;
+
+    grid.appendChild(card);
+});
     const add = document.createElement("button");
     add.type = "button";
     add.className = "subject-card subject-add-card";
