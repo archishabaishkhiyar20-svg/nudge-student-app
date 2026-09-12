@@ -3516,11 +3516,63 @@ function updateWeekStrip() {
         const key = getLocalDateKey(d);
         const hasItem = items.some(item => item.date === key && !item.completed);
         const card = document.createElement("div");
-        card.className = "week-day" + (getLocalDateKey(now) === key ? " today" : "");
-        card.innerHTML = `<span class="day-name">${d.toLocaleDateString(undefined,{weekday:"short"})}</span><strong class="day-number">${d.getDate()}</strong>${hasItem ? '<span class="day-dot"></span>' : ''}`;
-        strip.appendChild(card);
+
+card.className =
+    "week-day" +
+    (getLocalDateKey(now) === key ? " today" : "");
+
+card.innerHTML = `
+    <span class="day-name">
+        ${d.toLocaleDateString(undefined, {
+            weekday: "short"
+        })}
+    </span>
+
+    <strong class="day-number">
+        ${d.getDate()}
+    </strong>
+
+    ${
+        hasItem
+            ? '<span class="day-dot"></span>'
+            : ''
     }
-}
+`;
+
+card.addEventListener("click", function() {
+
+    const dayItems = items.filter(function(item) {
+        return item.date === key;
+    });
+
+    if (!dayItems.length) {
+        alert("Nothing is due on this day.");
+        return;
+    }
+
+    const details = dayItems.map(function(item) {
+        return (
+            (item.icon || "📝") +
+            " " +
+            item.name +
+            (item.subject
+                ? " — " + item.subject
+                : "")
+        );
+    }).join("\n");
+
+    alert(
+        d.toLocaleDateString(undefined, {
+            weekday: "long",
+            month: "short",
+            day: "numeric"
+        }) +
+        "\n\n" +
+        details
+    );
+});
+
+strip.appendChild(card);
 /* =========================
    V5 SIDEBAR NAVIGATION
 ========================= */
