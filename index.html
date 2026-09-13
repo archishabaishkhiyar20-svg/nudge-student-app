@@ -3542,12 +3542,13 @@ function updateTodayLabel() {
         weekday: "long", month: "short", day: "numeric"
     }).toUpperCase();
 }
-function updateWeekStrip() {
+    function updateWeekStrip() {
     const strip = document.getElementById("weekStrip");
     if (!strip) return;
 
     const now = new Date();
     const start = new Date(now);
+
     const settings = getAppSettings();
     const day = start.getDay();
 
@@ -3561,6 +3562,7 @@ function updateWeekStrip() {
     }
 
     const items = getSavedItems();
+
     strip.innerHTML = "";
 
     for (let i = 0; i < 7; i++) {
@@ -3598,32 +3600,7 @@ function updateWeekStrip() {
         `;
 
         card.addEventListener("click", function() {
-            if (!dayItems.length) {
-                alert("Nothing is due on this day.");
-                return;
-            }
-
-            const details = dayItems.map(function(item) {
-                return (
-                    (item.completed ? "✓ " : "• ") +
-                    (item.icon || "📝") +
-                    " " +
-                    item.name +
-                    (item.subject
-                        ? " — " + item.subject
-                        : "")
-                );
-            }).join("\n");
-
-            alert(
-                d.toLocaleDateString(undefined, {
-                    weekday: "long",
-                    month: "long",
-                    day: "numeric"
-                }) +
-                "\n\n" +
-                details
-            );
+            openWeekDayModal(key);
         });
 
         strip.appendChild(card);
