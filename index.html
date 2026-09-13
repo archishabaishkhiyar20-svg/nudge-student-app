@@ -49,6 +49,88 @@
  .settings-group,.page-empty,.task-card{max-width:100%;box-sizing:border-box;}
  .settings-row{gap:12px;padding-left:16px;padding-right:16px;}
 }
+    /* Week Day Details Popup */
+
+.week-day-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.week-day-modal.hidden {
+    display: none;
+}
+
+.week-day-modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(5px);
+}
+
+.week-day-modal-card {
+    position: relative;
+    width: min(430px, 100%);
+    max-height: 80vh;
+    overflow-y: auto;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    padding: 26px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    z-index: 1;
+}
+
+.week-day-modal-close {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 50%;
+    background: var(--soft);
+    color: var(--text);
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.week-day-modal-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+}
+
+.week-day-modal-card h2 {
+    margin: 6px 35px 22px 0;
+    font-size: 22px;
+    color: var(--text);
+}
+
+.week-day-modal-item {
+    padding: 15px;
+    margin-top: 10px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--soft);
+}
+
+.week-day-modal-item-name {
+    font-weight: 750;
+    font-size: 15px;
+    color: var(--text);
+}
+
+.week-day-modal-item-meta {
+    margin-top: 7px;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+}
 </style>
 
 <style>
@@ -3066,87 +3148,74 @@ function closeWeekDayModal() {
 
 function updateExistingItem() {
     const name = document.getElementById("itemName").value.trim();
+
     if (!name) {
         alert("Please enter what you got.");
         return;
     }
 
     const items = getSavedItems();
+
     const item = items.find(function(savedItem) {
         return String(savedItem.id) === String(editingItemId);
     });
 
     if (!item) {
-        closeForm();
+        alert("Couldn't find this item.");
         return;
     }
 
-    item.name = name;
-    item.type = document.getElementById("itemType").value;
-    item.subject = document.getElementById("itemSubject").value.trim();
-    item.source = document.getElementById("itemSource").value;
-    item.date = document.getElementById("itemDate").value;
-    item.time = document.getElementById("itemTime").value;
+    item.name =
+        document.getElementById("itemName").value.trim();
 
-    if (item.type === "Assignment") item.icon = "📚";
-    else if (item.type === "Project") item.icon = "📌";
-    else if (item.type === "Homework") item.icon = "📖";
-    else item.icon = "📝";
+    item.type =
+        document.getElementById("itemType").value;
+
+    item.subject =
+        document.getElementById("itemSubject").value.trim();
+
+    item.source =
+        document.getElementById("itemSource").value;
+
+    item.date =
+        document.getElementById("itemDate").value;
+
+    item.time =
+        document.getElementById("itemTime").value;
+
+    if (item.type === "Assignment") {
+        item.icon = "📚";
+    } else if (item.type === "Project") {
+        item.icon = "📌";
+    } else if (item.type === "Homework") {
+        item.icon = "📖";
+    } else {
+        item.icon = "📝";
+    }
 
     saveItems(items);
+
+    editingItemId = null;
+
     closeForm();
+
+    updateSummary();
+    updateWeekStrip();
 
     renderTasksPage();
     renderTestsPage();
     renderCalendarPage();
-    updateSummary();
 
     const taskList = document.querySelector(".task-list");
+
     if (taskList) {
         taskList.innerHTML = "";
-        items.forEach(addCardToPage);
+
+        items.forEach(function(savedItem) {
+            addCardToPage(savedItem);
+        });
     }
 }
-
-/* =========================
-   MARK DONE / UNDO
-========================= */
-
-function markDone(button, itemId) {
-
-    const savedItems =
-        getSavedItems();
-
-    const item =
-        savedItems.find(
-            item => item.id === itemId
-        );
-
-    if (!item) {
-        return;
-    }
-
-    item.completed =
-        !item.completed;
-
-    saveItems(savedItems);
-
-    const card =
-        button.parentElement;
-
-    card.classList.toggle(
-        "completed",
-        item.completed
-    );
-
-    button.textContent =
-        item.completed
-        ? "↩ Undo"
-        : "✓ Done";
-
-    updateSummary();
-}
-
 
 /* =========================
    DELETE ITEM
