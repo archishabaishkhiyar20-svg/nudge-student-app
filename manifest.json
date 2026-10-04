@@ -1,16 +1,11 @@
 {
+  "id": "/nudge-student-app/index.html",
   "name": "Nudge - Student Organizer",
   "short_name": "Nudge",
   "description": "Never miss what matters.",
-  "start_url": "./index.html",
+  "start_url": "/nudge-student-app/index.html",
+  "scope": "/nudge-student-app/",
   "display": "standalone",
   "background_color": "#f5f1e8",
-  "theme_color": "#75896f",
-  "icons": [
-    {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml"
-    }
-  ]
+  "theme_color": "#75896f"
 }
