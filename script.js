@@ -3088,3 +3088,16 @@ async function requestNotificationPermission() {
         });
     }
 }
+function testNudgeReminder() {
+    if (Notification.permission !== "granted") {
+        alert("Please enable notifications first.");
+        return;
+    }
+
+    setTimeout(() => {
+        new Notification("Nudge 🔔", {
+            body: "Your Physics test is coming up!",
+            icon: "./icon-192.png"
+        });
+    }, 10000);
+}
