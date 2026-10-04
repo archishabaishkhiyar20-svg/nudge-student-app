@@ -7,5 +7,13 @@
   "scope": "/nudge-student-app/",
   "display": "standalone",
   "background_color": "#f5f1e8",
-  "theme_color": "#75896f"
+  "theme_color": "#75896f",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
 }
