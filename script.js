@@ -3061,3 +3061,15 @@ function enterNudge() {
   function init() { setupLanding(); setupReveal(); setupDemo(); setupDashboard(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker
+            .register("./service-worker.js")
+            .then(() => {
+                console.log("Nudge service worker registered");
+            })
+            .catch((error) => {
+                console.error("Service worker registration failed:", error);
+            });
+    });
+}
