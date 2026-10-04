@@ -3073,3 +3073,18 @@ if ("serviceWorker" in navigator) {
             });
     });
 }
+async function requestNotificationPermission() {
+    if (!("Notification" in window)) {
+        alert("Notifications are not supported on this device.");
+        return;
+    }
+
+    const permission = await Notification.requestPermission();
+
+    if (permission === "granted") {
+        new Notification("Nudge 🔔", {
+            body: "Notifications are now enabled!",
+            icon: "./icon-192.png"
+        });
+    }
+}
