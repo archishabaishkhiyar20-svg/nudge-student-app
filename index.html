@@ -861,6 +861,18 @@
 <!-- Cloudflare Web Analytics -->
 <script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "2f5b0652d25148b189dc50b2269bb6df"}'></script>
 <!-- End Cloudflare Web Analytics -->
+    <script>
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", async () => {
+        try {
+            await navigator.serviceWorker.register("./service-worker.js");
+            console.log("Nudge service worker registered!");
+        } catch (error) {
+            console.error("Nudge service worker registration failed:", error);
+        }
+    });
+}
+</script>
 <script src="script.js"></script>
 </body>
 </html>
