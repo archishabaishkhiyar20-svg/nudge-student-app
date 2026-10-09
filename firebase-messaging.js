@@ -49,9 +49,14 @@ export async function enableNudgePushNotifications() {
         alert("Nudge push notifications are enabled on this device!");
         console.log("Nudge push registration successful.");
     } catch (error) {
-        console.error("Nudge push setup failed:", error);
-        alert("Couldn't enable push notifications. Please try again.");
-    }
+    console.error("Nudge push setup failed:", error);
+
+    alert(
+        "Firebase error: " +
+        (error.code || error.name || "Unknown") +
+        "\n" +
+        error.message
+    );
 }
 
 onMessage(messaging, payload => {
