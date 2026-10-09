@@ -3079,25 +3079,70 @@ async function requestNotificationPermission() {
         return;
     }
 
-    const permission = await Notification.requestPermission();
+    try {
+        const permission = await Notification.requestPermission();
 
-    if (permission === "granted") {
-        new Notification("Nudge 🔔", {
-            body: "Notifications are now enabled!",
-            icon: "./icon-192.png"
-        });
+        if (permission === "granted") {
+            if ("serviceWorker" in navigator) {
+                const registration = await navigator.serviceWorker.ready;
+
+                await registration.showNotification("Nudge 🔔", {
+                    body: "Notifications are now enabled!",
+                    icon: "./icon-192.png"
+                });
+            } else {
+                new Notification("Nudge 🔔", {
+                    body: "Notifications are now enabled!",
+                    icon: "./icon-192.png"
+                });
+            }
+        } else if (permission === "denied") {
+            alert(
+                "Notifications are blocked. Please allow them in your browser settings."
+            );
+        }
+    } catch (error) {
+        console.error("Notification permission error:", error);
+        alert("Something went wrong while enabling notifications.");
     }
 }
-function testNudgeReminder() {
+
+
+async function testNudgeReminder() {
+    if (!("Notification" in window)) {
+        alert("Notifications are not supported on this device.");
+        return;
+    }
+
     if (Notification.permission !== "granted") {
         alert("Please enable notifications first.");
         return;
     }
 
-    setTimeout(() => {
-        new Notification("Nudge 🔔", {
-            body: "Your Physics test is coming up!",
-            icon: "./icon-192.png"
-        });
-    }, 10000);
+    try {
+        if ("serviceWorker" in navigator) {
+            const registration = await navigator.serviceWorker.ready;
+
+            setTimeout(async () => {
+                try {
+                    await registration.showNotification("Nudge 🔔", {
+                        body: "Your Physics test is coming up!",
+                        icon: "./icon-192.png"
+                    });
+                } catch (error) {
+                    console.error("Test reminder failed:", error);
+                }
+            }, 10000);
+        } else {
+            setTimeout(() => {
+                new Notification("Nudge 🔔", {
+                    body: "Your Physics test is coming up!",
+                    icon: "./icon-192.png"
+                });
+            }, 10000);
+        }
+    } catch (error) {
+        console.error("Service worker error:", error);
+        alert("Couldn't schedule the test reminder.");
+    }
 }
