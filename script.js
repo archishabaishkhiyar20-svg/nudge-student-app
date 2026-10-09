@@ -3109,7 +3109,7 @@ async function requestNotificationPermission() {
 
 
 async function testNudgeReminder() {
-   alert("Test Reminder function started!");
+   
     if (!("Notification" in window)) {
         alert("Notifications are not supported on this device.");
         return;
@@ -3124,7 +3124,7 @@ async function testNudgeReminder() {
         if ("serviceWorker" in navigator) {
             const registration = await navigator.serviceWorker.ready;
 
-           alert("Service worker is ready. Test notification in 10 seconds.");
+          
             setTimeout(async () => {
                 try {
                     await registration.showNotification("Nudge 🔔", {
