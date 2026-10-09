@@ -3109,6 +3109,7 @@ async function requestNotificationPermission() {
 
 
 async function testNudgeReminder() {
+   alert("Test Reminder function started!");
     if (!("Notification" in window)) {
         alert("Notifications are not supported on this device.");
         return;
