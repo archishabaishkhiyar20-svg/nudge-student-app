@@ -1,11 +1,11 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+
 import {
     getMessaging,
     getToken,
     onMessage
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging.js";
 
-// Replace these placeholder values with your Firebase web app config.
 const firebaseConfig = {
    apiKey: "AIzaSyDirexfBxfJo4T7iYShb6IE7pK8WQR7Lc4",
   authDomain: "nudge-9cabe.firebaseapp.com",
@@ -16,8 +16,7 @@ const firebaseConfig = {
   measurementId: "G-L2CP06ZQ8Z"
 };
 
-// Your Web Push public key from Firebase Console.
-const vapidKey = "YOUR_WEB_PUSH_PUBLIC_KEY";
+const vapidKey = BF3WTo354ULsFw6109a0UR3gLLleE1QCi5t8Czp7frK4hyQuKu6t_MQ2ztaYwdEmGXKx2Mucig8vp9cXZidF5Wo;
 
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
@@ -43,20 +42,21 @@ export async function enableNudgePushNotifications() {
             return;
         }
 
-        // Temporary: keep the token on this device for testing.
         localStorage.setItem("nudgeFcmToken", token);
 
-        alert("Nudge push notifications are enabled on this device!");
         console.log("Nudge push registration successful.");
-    } catch (error) {
-    console.error("Nudge push setup failed:", error);
+        alert("Nudge push notifications are enabled on this device!");
 
-    alert(
-        "Firebase error: " +
-        (error.code || error.name || "Unknown") +
-        "\n" +
-        error.message
-    );
+    } catch (error) {
+        console.error("Nudge push setup failed:", error);
+
+        alert(
+            "Firebase error: " +
+            (error.code || error.name || "Unknown") +
+            "\n" +
+            error.message
+        );
+    }
 }
 
 onMessage(messaging, payload => {
