@@ -874,5 +874,10 @@ if ("serviceWorker" in navigator) {
 }
 </script>
 <script src="script.js"></script>
+    <script type="module">
+    import { enableNudgePushNotifications } from "./firebase-messaging.js";
+
+    window.enableNudgePushNotifications = enableNudgePushNotifications;
+</script>
 </body>
 </html>
