@@ -3123,6 +3123,7 @@ async function testNudgeReminder() {
         if ("serviceWorker" in navigator) {
             const registration = await navigator.serviceWorker.ready;
 
+           alert("Service worker is ready. Test notification in 10 seconds.");
             setTimeout(async () => {
                 try {
                     await registration.showNotification("Nudge 🔔", {
