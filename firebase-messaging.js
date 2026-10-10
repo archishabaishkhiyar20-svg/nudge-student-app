@@ -16,7 +16,7 @@ const firebaseConfig = {
   measurementId: "G-L2CP06ZQ8Z"
 };
 
-const vapidKey = BF3WTo354ULsFw6109a0UR3gLLleE1QCi5t8Czp7frK4hyQuKu6t_MQ2ztaYwdEmGXKx2Mucig8vp9cXZidF5Wo;
+const vapidKey = "BF3WTo354ULsFw6109a0UR3gLLleE1QCi5t8Czp7frK4hyQuKu6t_MQ2ztaYwdEmGXKx2Mucig8vp9cXZidF5Wo";
 
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
